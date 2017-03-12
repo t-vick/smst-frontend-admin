@@ -1,0 +1,100 @@
+.smst-sidenav h3 {
+    border: none;
+    font-size: 10px;
+    letter-spacing: 1px;
+    line-height: 24px;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin: 0;
+    padding: 0 16px;
+    color: rgb(255, 255, 255);
+    background: rgba(0, 0, 0, 0.317647);
+    min-width: 200px;
+}
+
+.smst-sidenav ul {
+  padding: 0;
+  margin-bottom: 0 !important;
+}
+
+.smst-sidenav ul li a {
+    color: rgba(0,0,0,.54);
+    text-decoration: none;
+    background-color: transparent;
+    box-sizing: border-box;
+    display: block;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 47px;
+    text-decoration: none;
+    -webkit-transition: all .3s;
+    transition: all .3s;
+    padding: 0 16px;
+    position: relative;
+}
+
+.smst-sidenav ul li a:hover {
+  background: #fafafa;
+}
+
+
+
+
+
+.smst-sidenav ul li {
+	list-style: none;
+	display: list-item;
+  cursor: pointer;
+  border-color: rgba(0,0,0,.06);
+  color: rgba(0,0,0,.54);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  margin: 0;
+  padding: 0;
+}
+
+.smst-container {
+  border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.smst-sidenav-content {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.smst-sidenav-content {
+  position: relative;
+}
+
+.smst-sidenav-content button {
+  position: absolute;
+  top: 10px;
+  left: 200px;
+}
+
+.smst-sidenav-fab-container {
+  padding-right: 20px;
+}
+
+.smst-sidenav-fab-container md-sidenav {
+  max-width: 200px;
+}
+
+.smst-sidenav-fab-container .mat-sidenav-content,
+.smst-sidenav-fab-container md-sidenav {
+  display: flex;
+  overflow: visible;
+}
+
+.smst-scrolling-content {
+  overflow: auto;
+}
+
+.smst-fab {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
