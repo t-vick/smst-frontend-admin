@@ -1,4 +1,6 @@
-import {Component, ViewEncapsulation} from '@angular/core';
+import {Component, ViewEncapsulation, ViewChild } from '@angular/core';
+
+import { MdSidenav } from '@angular/material';
 
 @Component({
 	selector: 'sidebar',
@@ -7,5 +9,6 @@ import {Component, ViewEncapsulation} from '@angular/core';
 	encapsulation: ViewEncapsulation.None,
 })
 export class SidebarComponent {
+	@ViewChild( MdSidenav ) sidenav:MdSidenav;
 
 }

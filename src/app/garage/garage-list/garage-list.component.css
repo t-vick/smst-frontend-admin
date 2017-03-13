@@ -2,3 +2,12 @@ button {
 	background-color: #00bcd4;
 	color: rgb(255, 255, 255);
 }
+
+.table {
+	margin-left: 20px;
+}
+
+.smst-admin-toolbar {
+	margin-top: 10px;
+	background-color:rgba(0,0,0,.03);
+}
