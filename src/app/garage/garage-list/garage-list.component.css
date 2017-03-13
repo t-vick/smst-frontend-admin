@@ -1,10 +1,9 @@
+.smst-admin-datatable {
+	margin: 0 20px;
+}
 button {
 	background-color: #00bcd4;
 	color: rgb(255, 255, 255);
-}
-
-.table {
-	margin-left: 20px;
 }
 
 .smst-admin-toolbar {
