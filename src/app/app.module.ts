@@ -12,6 +12,7 @@ import { LayoutComponent } from './layout/layout.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 
 import { AppRoutingModule } from './app-routing.module';
+import { CoreModule } from './core/core.module';
 import { GarageModule } from './garage/garage.module';
 import 'hammerjs';
 @NgModule({
@@ -28,6 +29,7 @@ import 'hammerjs';
     FlexLayoutModule,
     AppRoutingModule,
     GarageModule,
+    CoreModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

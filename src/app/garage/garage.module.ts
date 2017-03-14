@@ -6,6 +6,8 @@ import { DataTableModule } from "angular2-datatable";
 
 import { GarageListComponent } from './garage-list/garage-list.component';
 import { GarageAddComponent } from './garage-add/garage-add.component';
+
+import { GarageRoutingModule } from './garage-routing.module';
 @NgModule({
 	declarations: [
 		GarageListComponent,
@@ -16,6 +18,7 @@ import { GarageAddComponent } from './garage-add/garage-add.component';
 		FlexLayoutModule,
 		MaterialModule,
 		DataTableModule,
+		GarageRoutingModule,
 	],
 	exports: [
 		GarageListComponent,
