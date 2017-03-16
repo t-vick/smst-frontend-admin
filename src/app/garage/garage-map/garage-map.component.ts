@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, DoCheck, AfterViewInit } from '@angular/core';
 
 @Component({
 	moduleId: module.id,
@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
 	templateUrl: './garage-map.component.html',
 	styleUrls: [ './garage-map.component.css' ],
 })
-export class GarageMapComponent {
+export class GarageMapComponent implements DoCheck, AfterViewInit {
 	private option = {
     x: 0,//鼠标点击位置
     y: 0,
@@ -117,4 +117,18 @@ export class GarageMapComponent {
     ]
     }
   };
+
+  private boxSize: number;
+  constructor(private el: ElementRef) {
+  	
+  }
+
+  ngDoCheck() {
+  	if (!this.boxSize) return;
+  	this.boxSize = this.el.nativeElement.clientWidth * this.el.nativeElement.clientHeight;
+  }
+
+  ngAfterViewInit() {
+  	this.boxSize = this.el.nativeElement.clientWidth * this.el.nativeElement.clientHeight;
+  }
 }

@@ -1,10 +1,11 @@
-import { Directive, ElementRef, HostListener, Input, AfterViewInit } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, AfterViewInit, OnChanges, SimpleChange } from '@angular/core';
 
 @Directive({
 	selector: '[garageMap]',
 
 })
-export class GarageMapDirective implements AfterViewInit{
+export class GarageMapDirective implements AfterViewInit, OnChanges {
+	@Input() size: any;
 	@Input('garageMap')
 	private mapOption: Object;
 	private ctx: any;
@@ -18,7 +19,7 @@ export class GarageMapDirective implements AfterViewInit{
 		this.ctx=this.el.nativeElement.getContext("2d");
 	};
 
-	ngAfterViewInit() {
+	private resize() {
 		this.ctx.canvas.setAttribute('height',this.el.nativeElement.clientHeight);//必须先设置高度？
 		this.ctx.canvas.setAttribute('width',this.el.nativeElement.clientWidth);
 
@@ -26,9 +27,18 @@ export class GarageMapDirective implements AfterViewInit{
 		this.ctx.lineCap = 'round';
 		this.ctx.lineJoin = 'round';
 		this.ctx.globalAlpha = 0.3;
-
 		this.ctx.fillStyle = '#ff0000';
 		this.ctx.fillRect(0,0,75,75);
+	}
+
+	ngAfterViewInit() {
+		if (!this.size) return;
+		this.resize();
+	}
+
+	ngOnChanges(changes: {[key: string]: SimpleChange}) {
+		if (!this.size) return;
+		this.resize();
 	}
 
 	@HostListener('mousedown', ['$event']) onMouseDown(ev) {
@@ -59,4 +69,5 @@ export class GarageMapDirective implements AfterViewInit{
 	@HostListener('mouseout') onMouseOut() {
 		this.isMouseDown = false;
 	}
+
 }
