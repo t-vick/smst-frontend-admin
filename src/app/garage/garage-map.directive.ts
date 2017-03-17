@@ -10,10 +10,12 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	private mapOption: Object;
 	private ctx: any;
 	private isMouseDown: boolean = false;//用于记录鼠标左键是否按下
-	private offsetX: number = 0;//绘图区域左上角，相对于整幅地图原点的偏移量
+	private offsetX: number = 0;//绘图区域坐标原点，相对于整幅地图原点的偏移量
 	private offsetY: number = 0;
-	private locStatusX: number = 20;
+	private locStatusX: number = 20;//鼠标相对于整幅地图的位置的提示信息的位置
 	private locStatusY: number =20;
+	private cursorX: number;//鼠标相对于整个地图的位置
+	private cursorY: number;
 	private selectedObj: any;
 	private keypressSubscription:any;
 	private isSpaceDown: boolean = false;//控制拖动单个对象的开关
@@ -41,7 +43,10 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		this.ctx.canvas.setAttribute('width',this.el.nativeElement.clientWidth);
 
 		/**
-		 * 状态栏的位置要去掉画布坐标原点，相对于左上角的偏移量
+		 * 状态栏的位置要去掉画布坐标原点，相对于左上角
+		 * （初始化时的this.offsetX,this.offsetY）的偏移量,
+		 * 初始化时this.offsetX,this.offsetY由后台根据当前人
+		 * 的位置返回给前端
 		 */
 		this.locStatusX = 20 - this.offsetX;
 		this.locStatusY = this.el.nativeElement.clientHeight - this.offsetY - 30;
@@ -88,10 +93,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	 */
 	@HostListener('mousemove', ['$event']) private onMouseMove(ev) {
 		if (this.isMouseDown) {
-			// this.locStatusX -= ev.movementX;
-			// this.locStatusY -= ev.movementY;
 			if (!this.isSpaceDown) {//拖拽地图，整体移动
-				console.log('no space');
 				this.locStatusX -= ev.movementX;
 				this.locStatusY -= ev.movementY;
 				//累加坐标原点相对于整幅地图原点的偏移量
@@ -104,7 +106,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 				this.selectedObj.rotateX += ev.movementX;
 				this.selectedObj.rotateY += ev.movementY;
 			} else if (this.isKeySDown) {//缩放当个对象
-				
+
 			}
 
 
