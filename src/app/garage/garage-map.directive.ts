@@ -176,7 +176,11 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 				break;
 			case 'Space':
 			{
-				this.isSpaceDown = true;
+				/**
+				 * 添加观察者模式后，keypress事件成对出现
+				 * 刚好第一次开启isSpaceDown,一次关闭isSpaceDown
+				 */
+				this.isSpaceDown = !this.isSpaceDown;
 			}
 			break;
 		}
