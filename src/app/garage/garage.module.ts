@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MaterialModule } from '@angular/material';
 import { DataTableModule } from "angular2-datatable";
@@ -20,6 +21,7 @@ import { GarageRoutingModule } from './garage-routing.module';
 	],
 	imports: [
 		CommonModule,
+		FormsModule,
 		FlexLayoutModule,
 		MaterialModule,
 		DataTableModule,

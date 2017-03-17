@@ -8,13 +8,10 @@ import { Component, ElementRef, DoCheck, AfterViewInit } from '@angular/core';
 })
 export class GarageMapComponent implements DoCheck, AfterViewInit {
 	private option = {
-    x: 0,//鼠标点击位置
-    y: 0,
-    map: null,
     option: {
-      xLoc: 0,//画布左上角坐标
-      yLoc: 0,
-      pillarList: [
+      offsetX: 0,//画布左上角坐标,相对于整幅地图坐标原点的偏移量
+      offsetY: 0,
+      pillarList: [//方形柱子
       {
         x: 150,
         y: 150,
@@ -28,7 +25,7 @@ export class GarageMapComponent implements DoCheck, AfterViewInit {
         height: 10
       }
     ],
-    cylinderList: [
+    cylinderList: [//圆形柱子
       {
         x: 50,
         y: 270,
@@ -50,34 +47,46 @@ export class GarageMapComponent implements DoCheck, AfterViewInit {
         r: 5
       }
     ],
-      pathList: [
+      pathList: [//道路
       {
         startX: -10,
         endX: 400,
         startY: 250,
         endY: 250,
-        width: 20
+        width: 20,
+        rotateX: 195,
+        rotateY: 250,
+        deg: 0.25,
       },
        {
         startX: -10,
         endX: 400,
         startY: 400,
         endY: 400,
-        width: 20
+        width: 20,
+        rotateX: 195,
+        rotateY: 250,
+        deg: 0.25,
       },
        {
         startX: 30,
         endX: 30,
         startY: -10,
         endY: 800,
-        width: 20
+        width: 20,
+        rotateX: 195,
+        rotateY: 250,
+        deg: 0.25,
       },
        {
         startX: 330,
         endX: 330,
         startY: -10,
         endY: 800,
-        width: 20
+        width: 20,
+        rotateX: 195,
+        rotateY: 250,
+        deg: 0.25,
       }
     ],
     cellList: [
@@ -86,7 +95,7 @@ export class GarageMapComponent implements DoCheck, AfterViewInit {
         y: 275,
         w: 78,
         h: 100,
-        num: {
+        num: {//编号及其坐标
           x: 80,
           y: 300,
           text: '301'
