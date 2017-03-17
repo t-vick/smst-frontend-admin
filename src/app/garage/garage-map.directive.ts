@@ -12,14 +12,17 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	private isMouseDown: boolean = false;//用于记录鼠标左键是否按下
 	private offsetX: number = 0;//绘图区域坐标原点，相对于整幅地图原点的偏移量
 	private offsetY: number = 0;
+	private topLeftX: number = 0;//窗口左上角，相对于整幅地图原点的坐标
+	private topLeftY: number = 0;//初始值与offsetY相同，从后台获取
 	private locStatusX: number = 20;//鼠标相对于整幅地图的位置的提示信息的位置
 	private locStatusY: number =20;
-	private cursorX: number;//鼠标相对于整个地图的位置
-	private cursorY: number;
+	private cursorX: number = 0;//鼠标相对于整个地图的位置
+	private cursorY: number = 0;
 	private selectedObj: any;
 	private keypressSubscription:any;
 	private isSpaceDown: boolean = false;//控制拖动单个对象的开关
 	private isKeySDown: boolean = false;//控制单个对象缩放的开关
+	private objList: any;
 
 	constructor(private el: ElementRef){
 		this.ctx=this.el.nativeElement.getContext("2d");
@@ -32,6 +35,19 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			rotateY: 37.5,
 			deg: 0.25,
 		};
+
+		this.objList = [
+			{
+				x: 150,
+				y: 150,
+				w: 75,
+				h: 75,
+				rotateX: 37.5,
+				rotateY: 37.5,
+				deg: 0.25,
+			},
+			this.selectedObj,
+		]
 
 	};
 
@@ -88,32 +104,101 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		this.isMouseDown = true;
 	}
 
+	private isCursorInObj() {
+		//还要判断元素是车位还是立柱还是道路
+		if (this.cursorX > this.selectedObj.x && this.cursorX < this.selectedObj.x + this.selectedObj.w 
+			&& this.cursorY > this.selectedObj.y && this.cursorY < this.selectedObj.y + this.selectedObj.h) {
+			return true;
+		}
+		// //宽度变为负数的情况
+		// if (this.cursorX < this.selectedObj.x && this.cursorX > this.selectedObj.x + this.selectedObj.w 
+		// 	&& this.cursorY > this.selectedObj.y && this.cursorY < this.selectedObj.y + this.selectedObj.h) {
+		// 	return true;
+		// }
+
+		// //高度变为负数的情况
+		// if (this.cursorX > this.selectedObj.x && this.cursorX < this.selectedObj.x + this.selectedObj.w 
+		// 	&& this.cursorY < this.selectedObj.y && this.cursorY > this.selectedObj.y + this.selectedObj.h) {
+		// 	return true;
+		// }
+
+		// //宽度、高度都变为负数的情况
+		// if (this.cursorX < this.selectedObj.x && this.cursorX > this.selectedObj.x + this.selectedObj.w 
+		// 	&& this.cursorY < this.selectedObj.y && this.cursorY > this.selectedObj.y + this.selectedObj.h) {
+		// 	return true;
+		// }
+		return false;
+	}
+
 	/**
 	 * 鼠标移动事件处理
 	 */
 	@HostListener('mousemove', ['$event']) private onMouseMove(ev) {
+		console.log(this.isSpaceDown);
+
 		if (this.isMouseDown) {
-			if (!this.isSpaceDown) {//拖拽地图，整体移动
+			if (!this.isSpaceDown && !this.isKeySDown || 
+				this.isSpaceDown && this.isKeySDown) {//拖拽地图，整体移动
 				this.locStatusX -= ev.movementX;
 				this.locStatusY -= ev.movementY;
 				//累加坐标原点相对于整幅地图原点的偏移量
 				this.offsetX += ev.movementX;
 				this.offsetY += ev.movementY;
-				this.ctx.translate(ev.movementX, ev.movementY);
-			} else if (!this.isKeySDown){//拖拽单个对象
-				this.selectedObj.x += ev.movementX;
-				this.selectedObj.y += ev.movementY;
-				this.selectedObj.rotateX += ev.movementX;
-				this.selectedObj.rotateY += ev.movementY;
-			} else if (this.isKeySDown) {//缩放当个对象
+				//累加窗口左上角，相对整幅地图原点的总偏移量
+				this.topLeftX -= ev.movementX;
+				this.topLeftY -= ev.movementY;
 
+				this.ctx.translate(ev.movementX, ev.movementY);
+			} else if (this.isSpaceDown){//拖拽单个对象
+				//判断鼠标是否点中对象
+				if (this.isCursorInObj()) {
+					this.selectedObj.x += ev.movementX;
+					this.selectedObj.y += ev.movementY;
+					this.selectedObj.rotateX += ev.movementX;
+					this.selectedObj.rotateY += ev.movementY;
+				}
+		
+			} else if (this.isKeySDown) {//缩放当个对象
+				if (this.selectedObj.w > 10) {
+					this.selectedObj.w += ev.movementX;
+					//旋转中心也得随着变动
+					this.selectedObj.rotateX += ev.movementX / 2;
+				} else if (ev.movementX > 0) {
+					this.selectedObj.w += ev.movementX;
+					//旋转中心也得随着变动
+					this.selectedObj.rotateX += ev.movementX / 2;
+				}
+
+				if (this.selectedObj.h > 10) {
+					this.selectedObj.h += ev.movementY;
+					this.selectedObj.rotateY += ev.movementY / 2;
+				} else if (ev.movementY > 0) {//小于或等于10时，只能放大
+					this.selectedObj.h += ev.movementY;
+					this.selectedObj.rotateY += ev.movementY / 2;
+				}
+
+
+				
 			}
 
 
-			this.clearMap();
+			// this.clearMap();
 
-			this.drawMap();
+			// this.drawMap();
 		}
+		/**
+		 * 记录鼠标的当前位置,必须放到处理地图拖拽之后
+		 * 否则当this.offsetX,this.offsetY变化的时候，
+		 * 不能把变化量累加到this.cursorX,this.cursorY
+		 * 从而导致，当拖拽地图后，鼠标不能准确的点中
+		 * 要拖拽的对象，使对象不能拖拽
+		 */
+		//计算鼠标相对于整幅地图原点的坐标
+		this.cursorX = this.topLeftX + ev.layerX;
+		this.cursorY = this.topLeftY + ev.layerY;
+		this.clearMap();
+
+		this.drawMap();
 	}
 
 	/**
@@ -136,7 +221,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	@HostListener('mouseenter') private onMouseEnter() {
 		let _this:any = this;
 		this.keypressSubscription = Observable.fromEvent(window,'keypress')
-			.debounceTime(200)
+			.debounceTime(100)
 			.subscribe((ev) => { _this.onKeyPress(ev); });
 		window.addEventListener('keyup', (ev) => { _this.onKeyUp(ev) });
 		// window.addEventListener('keydown', (ev) => { _this.onKeyDown(ev); });
@@ -174,6 +259,13 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 					this.drawMap();
 				}
 				break;
+			case 'KeyS': 
+				{
+					this.isKeySDown = !this.isKeySDown;
+					this.clearMap();
+					this.drawMap();
+				}
+				break;
 			case 'Space':
 			{
 				/**
@@ -198,6 +290,8 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 				 */
 				setTimeout(() => this.isSpaceDown = false, 200);
 				break;
+			case 'KeyS':
+				setTimeout(() => this.isKeySDown = false, 200);
 			default:
 				// code...
 				break;
@@ -216,16 +310,35 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	 */
 	private drawMap() {
 		this.ctx.fillStyle = '#000000';
-		this.ctx.fillText(`X:${this.offsetX} | Y:${this.offsetY}`,this.locStatusX,this.locStatusY);
+		this.ctx.fillText(`X:${this.cursorX} | Y:${this.cursorY}`,this.locStatusX,this.locStatusY);
 		this.ctx.fillStyle = '#ff0000';
-		this.ctx.fillRect(this.selectedObj.x,this.selectedObj.y,this.selectedObj.w,this.selectedObj.h);
-		this.ctx.save();
-		this.ctx.translate(this.selectedObj.rotateX, this.selectedObj.rotateY);
-		this.ctx.rotate(Math.PI*this.selectedObj.deg);
-		this.ctx.translate(-this.selectedObj.rotateX, -this.selectedObj.rotateY);
-		this.ctx.fillRect(this.selectedObj.x,this.selectedObj.y,this.selectedObj.w,this.selectedObj.h);
-		this.ctx.restore();
+		// this.ctx.fillRect(this.selectedObj.x,this.selectedObj.y,this.selectedObj.w,this.selectedObj.h);
+		for (let obj of this.objList) {
+			this.ctx.save();
+			this.ctx.translate(obj.rotateX, obj.rotateY);
+			this.ctx.rotate(Math.PI*obj.deg);
+			this.ctx.translate(-obj.rotateX, -obj.rotateY);
+			this.ctx.fillRect(obj.x,obj.y,obj.w,obj.h);
+			this.ctx.restore();
+		}
+		// this.ctx.save();
+		// this.ctx.translate(this.selectedObj.rotateX, this.selectedObj.rotateY);
+		// this.ctx.rotate(Math.PI*this.selectedObj.deg);
+		// this.ctx.translate(-this.selectedObj.rotateX, -this.selectedObj.rotateY);
+		// this.ctx.fillRect(this.selectedObj.x,this.selectedObj.y,this.selectedObj.w,this.selectedObj.h);
+		// this.ctx.restore();
 	}
+
+	/**
+	 * 重绘鼠标位置状态
+	 */
+	// private drawCursorLoc() {
+	// 	this.ctx.save();
+	// 	this.ctx.fillStyle = '#000000';
+	// 	this.ctx.fillText(`X:${this.cursorX} | Y:${this.cursorY}`,this.locStatusX,this.locStatusY);
+	// 	this.ctx.fillStyle = '#ff0000';
+	// 	this.ctx.restore();
+	// }
 
 	ngOnDestroy() {
 
