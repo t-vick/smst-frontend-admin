@@ -44,7 +44,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 				h: 75,
 				rotateX: 37.5,
 				rotateY: 37.5,
-				deg: 0.25,
+				deg: 0,
 			},
 			this.selectedObj,
 		]
@@ -127,6 +127,107 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		// 	&& this.cursorY < this.selectedObj.y && this.cursorY > this.selectedObj.y + this.selectedObj.h) {
 		// 	return true;
 		// }
+		//先求出旋转后被选择对象各个点的坐标
+		//对角线的一半
+		let halfDiagonal: number = Math.sqrt(Math.pow(this.selectedObj.w, 2) + Math.pow(this.selectedObj.h, 2)) / 2;
+		//旋转前，对角线与X轴的夹角
+		let fi: number = Math.atan( this.selectedObj.h / this.selectedObj.w );
+
+		//当旋转角deg与fi之和小于90°时
+		//四个角按照上右下左的顺序
+		let addDirectionX1 = 1;
+		if (this.selectedObj.deg + fi < Math.PI / 2) {
+			addDirectionX1 = -1;
+		} else {
+			addDirectionX1 = 1;
+		}
+		let x1: number = this.selectedObj.x + (this.selectedObj.w / 2 + halfDiagonal * Math.cos(this.selectedObj.deg + fi) * addDirectionX1);
+
+		let addDirectionY1 = 1;
+		if (this.selectedObj.deg < Math.PI - fi) {
+			addDirectionY1 = -1;
+		} else {
+			addDirectionY1 = 1;
+		}
+		let y1: number = this.selectedObj.y - (halfDiagonal * Math.abs(Math.cos( this.selectedObj.deg + fi)) + this.selectedObj.h / 2 * addDirectionY1);
+
+		let addDirectionX2 = 1;
+		if (this.selectedObj.deg < Math.PI / 2 + fi) {
+			addDirectionX2 = 1;
+		} else {
+			addDirectionX2 = -1;
+		}
+		let x2: number = (this.selectedObj.x + this.selectedObj.w) - (this.selectedObj.w / 2 - halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirectionX2);
+
+		let addDirectionY2 = 1;
+		if (this.selectedObj.deg < fi ) {
+			addDirectionY2 = -1;
+		} else {
+			addDirectionY2 = 1;
+		}
+		let y2: number = this.selectedObj.y + (this.selectedObj.h / 2 + halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirectionY2);
+
+		let addDirectionX3 = 1;
+		if (this.selectedObj.deg < Math.PI / 2 -fi) {
+			addDirectionX3 = -1
+		} else {
+			addDirectionX3 = 1;
+		}
+		let x3: number = (this.selectedObj.x + this.selectedObj.w) - (this.selectedObj.w / 2 + halfDiagonal * Math.cos(this.selectedObj.deg + fi) * addDirectionX3);
+
+		let addDirectionY3 = 1;
+		if (this.selectedObj.deg < Math.PI - fi) {
+			addDirectionY3 = -1;
+		} else {
+			addDirectionY3 = 1;
+		}
+		let y3: number = (this.selectedObj.y + this.selectedObj.h) + (halfDiagonal * Math.cos( this.selectedObj.deg + fi) + this.selectedObj.h / 2 * addDirectionY3);
+
+		let addDirectionX4 = 1;
+		if (this.selectedObj.deg < Math.PI / 2 + fi) {
+			addDirectionX4 = -1;
+		} else {
+			addDirectionX4 = 1;
+		}
+		let x4: number = this.selectedObj.x + (this.selectedObj.w / 2 + halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirectionX4);
+
+		let addDirectionY4 = 1;
+		if (this.selectedObj.deg < fi ) {
+			addDirectionY4 = -1;
+		} else {
+			addDirectionY4 = 1;
+		}
+		let y4: number = (this.selectedObj.y + this.selectedObj.h) - (this.selectedObj.h / 2 + halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirectionY4);
+
+
+		// if (this.selectedObj.deg + fi < Math.PI / 2) {
+		// 	let x1: number = this.selectedObj.x + (this.selectedObj.w / 2 - halfDiagonal * Math.cos(this.selectedObj.deg + fi));
+		// 	let y1: number = this.selectedObj.y - (halfDiagonal * Math.cos( this.selectedObj.deg + fi) - this.selectedObj.h / 2);
+
+		// 	let x2: number = (this.selectedObj.x + this.selectedObj.w) + (halfDiagonal * Math.cos( fi - this.selectedObj.deg ) - this.selectedObj.w / 2);
+
+		// 	let addDirection2 = 1;
+		// 	if (this.selectedObj.deg < fi ) {
+		// 		addDirection2 = -1;
+		// 	} else {
+		// 		addDirection2 = 1;
+		// 	}
+		// 	let y2: number = this.selectedObj.y + (this.selectedObj.h / 2 + halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirection2);
+
+		// 	let x3: number = (this.selectedObj.x + this.selectedObj.w) - (this.selectedObj.w / 2 - halfDiagonal * Math.cos(this.selectedObj.deg + fi));
+		// 	let y3: number = (this.selectedObj.y + this.selectedObj.h) + (halfDiagonal * Math.cos( this.selectedObj.deg + fi) - this.selectedObj.h / 2);
+
+		// 	let x4: number = this.selectedObj.x + this.selectedObj.w / 2 - halfDiagonal * Math.cos( fi - this.selectedObj.deg );
+		// 	let addDirection4 = 1;
+		// 	if (this.selectedObj.deg < fi ) {
+		// 		addDirection4 = -1;
+		// 	} else {
+		// 		addDirection4 = 1;
+		// 	}
+		// 	let y4: number = (this.selectedObj.y + this.selectedObj.h) - (this.selectedObj.h / 2 + halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirection4);
+			
+		// }
+
 		return false;
 	}
 
@@ -134,8 +235,6 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	 * 鼠标移动事件处理
 	 */
 	@HostListener('mousemove', ['$event']) private onMouseMove(ev) {
-		console.log(this.isSpaceDown);
-
 		if (this.isMouseDown) {
 			if (!this.isSpaceDown && !this.isKeySDown || 
 				this.isSpaceDown && this.isKeySDown) {//拖拽地图，整体移动
@@ -259,8 +358,11 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			case 'KeyD':
 				{
 					this.selectedObj.deg -= 0.0375;
-					if (this.selectedObj.deg >= 1) {
-						this.selectedObj.deg -= 1;
+					// if (this.selectedObj.deg >= 1) {
+					// 	this.selectedObj.deg -= 1;
+					// }
+					if ( this.selectedObj.deg < 0) {
+						this.selectedObj.deg += 1;
 					}
 					this.clearMap();
 					this.drawMap();
