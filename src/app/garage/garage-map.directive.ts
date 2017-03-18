@@ -248,6 +248,10 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			case 'KeyA':
 				{
 					this.selectedObj.deg += 0.0375;
+					//对于简单的矩形而言，当deg大于1(180°),就进入循环了
+					if (this.selectedObj.deg >= 1) {
+						this.selectedObj.deg -= 1;
+					}
 					this.clearMap();
 					this.drawMap();
 				}
@@ -255,6 +259,9 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			case 'KeyD':
 				{
 					this.selectedObj.deg -= 0.0375;
+					if (this.selectedObj.deg >= 1) {
+						this.selectedObj.deg -= 1;
+					}
 					this.clearMap();
 					this.drawMap();
 				}
