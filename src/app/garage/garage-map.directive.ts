@@ -104,29 +104,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		this.isMouseDown = true;
 	}
 
-	private isCursorInObj() {
-		//还要判断元素是车位还是立柱还是道路
-		if (this.cursorX > this.selectedObj.x && this.cursorX < this.selectedObj.x + this.selectedObj.w 
-			&& this.cursorY > this.selectedObj.y && this.cursorY < this.selectedObj.y + this.selectedObj.h) {
-			return true;
-		}
-		// //宽度变为负数的情况
-		// if (this.cursorX < this.selectedObj.x && this.cursorX > this.selectedObj.x + this.selectedObj.w 
-		// 	&& this.cursorY > this.selectedObj.y && this.cursorY < this.selectedObj.y + this.selectedObj.h) {
-		// 	return true;
-		// }
-
-		// //高度变为负数的情况
-		// if (this.cursorX > this.selectedObj.x && this.cursorX < this.selectedObj.x + this.selectedObj.w 
-		// 	&& this.cursorY < this.selectedObj.y && this.cursorY > this.selectedObj.y + this.selectedObj.h) {
-		// 	return true;
-		// }
-
-		// //宽度、高度都变为负数的情况
-		// if (this.cursorX < this.selectedObj.x && this.cursorX > this.selectedObj.x + this.selectedObj.w 
-		// 	&& this.cursorY < this.selectedObj.y && this.cursorY > this.selectedObj.y + this.selectedObj.h) {
-		// 	return true;
-		// }
+	private isCursorInObj(): boolean {
 		//先求出旋转后被选择对象各个点的坐标
 		//对角线的一半
 		let halfDiagonal: number = Math.sqrt(Math.pow(this.selectedObj.w, 2) + Math.pow(this.selectedObj.h, 2)) / 2;
@@ -136,99 +114,151 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		//当旋转角deg与fi之和小于90°时
 		//四个角按照上右下左的顺序
 		let addDirectionX1 = 1;
-		if (this.selectedObj.deg + fi < Math.PI / 2) {
+		if (this.selectedObj.deg * Math.PI + fi < Math.PI / 2) {//this.selectedObj.deg千万别忘了Math.PI
 			addDirectionX1 = -1;
 		} else {
 			addDirectionX1 = 1;
 		}
-		let x1: number = this.selectedObj.x + (this.selectedObj.w / 2 + halfDiagonal * Math.cos(this.selectedObj.deg + fi) * addDirectionX1);
+		let x1: number = this.selectedObj.x + (this.selectedObj.w / 2 + halfDiagonal * Math.abs(Math.cos(this.selectedObj.deg * Math.PI + fi)) * addDirectionX1);
 
 		let addDirectionY1 = 1;
-		if (this.selectedObj.deg < Math.PI - fi) {
-			addDirectionY1 = -1;
-		} else {
+		if (this.selectedObj.deg * Math.PI > Math.PI - fi) {
 			addDirectionY1 = 1;
+		} else {
+			addDirectionY1 = -1;
 		}
-		let y1: number = this.selectedObj.y - (halfDiagonal * Math.abs(Math.cos( this.selectedObj.deg + fi)) + this.selectedObj.h / 2 * addDirectionY1);
+		let y1: number = this.selectedObj.y + (this.selectedObj.h / 2 + halfDiagonal * Math.abs(Math.sin( this.selectedObj.deg * Math.PI + fi)) * addDirectionY1);
 
 		let addDirectionX2 = 1;
-		if (this.selectedObj.deg < Math.PI / 2 + fi) {
-			addDirectionX2 = 1;
-		} else {
+		if (this.selectedObj.deg * Math.PI < Math.PI / 2 + fi) {
 			addDirectionX2 = -1;
+		} else {
+			addDirectionX2 = 1;
 		}
-		let x2: number = (this.selectedObj.x + this.selectedObj.w) - (this.selectedObj.w / 2 - halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirectionX2);
+		let x2: number = (this.selectedObj.x + this.selectedObj.w) - (this.selectedObj.w / 2 + halfDiagonal * Math.abs(Math.cos( fi - this.selectedObj.deg * Math.PI )) * addDirectionX2);
 
 		let addDirectionY2 = 1;
-		if (this.selectedObj.deg < fi ) {
+		if (this.selectedObj.deg * Math.PI < fi ) {
 			addDirectionY2 = -1;
 		} else {
 			addDirectionY2 = 1;
 		}
-		let y2: number = this.selectedObj.y + (this.selectedObj.h / 2 + halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirectionY2);
+		let y2: number = this.selectedObj.y + (this.selectedObj.h / 2 + halfDiagonal * Math.abs(Math.sin( fi - this.selectedObj.deg * Math.PI )) * addDirectionY2);
 
 		let addDirectionX3 = 1;
-		if (this.selectedObj.deg < Math.PI / 2 -fi) {
+		if (this.selectedObj.deg * Math.PI < Math.PI / 2 -fi) {
 			addDirectionX3 = -1
 		} else {
 			addDirectionX3 = 1;
 		}
-		let x3: number = (this.selectedObj.x + this.selectedObj.w) - (this.selectedObj.w / 2 + halfDiagonal * Math.cos(this.selectedObj.deg + fi) * addDirectionX3);
+		let x3: number = (this.selectedObj.x + this.selectedObj.w) - (this.selectedObj.w / 2 + halfDiagonal * Math.abs(Math.cos(this.selectedObj.deg * Math.PI + fi)) * addDirectionX3);
 
 		let addDirectionY3 = 1;
-		if (this.selectedObj.deg < Math.PI - fi) {
-			addDirectionY3 = -1;
-		} else {
+		if (this.selectedObj.deg * Math.PI > Math.PI - fi) {
 			addDirectionY3 = 1;
+		} else {
+			addDirectionY3 = -1;
 		}
-		let y3: number = (this.selectedObj.y + this.selectedObj.h) + (halfDiagonal * Math.cos( this.selectedObj.deg + fi) + this.selectedObj.h / 2 * addDirectionY3);
+		let y3: number = (this.selectedObj.y + this.selectedObj.h) - (this.selectedObj.h / 2 + halfDiagonal * Math.abs(Math.sin( this.selectedObj.deg * Math.PI + fi)) * addDirectionY3);
 
 		let addDirectionX4 = 1;
-		if (this.selectedObj.deg < Math.PI / 2 + fi) {
+		if (this.selectedObj.deg * Math.PI < Math.PI / 2 + fi) {
 			addDirectionX4 = -1;
 		} else {
 			addDirectionX4 = 1;
 		}
-		let x4: number = this.selectedObj.x + (this.selectedObj.w / 2 + halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirectionX4);
+		let x4: number = this.selectedObj.x + (this.selectedObj.w / 2 + halfDiagonal * Math.abs(Math.cos( fi - this.selectedObj.deg * Math.PI )) * addDirectionX4);
 
 		let addDirectionY4 = 1;
-		if (this.selectedObj.deg < fi ) {
+		if (this.selectedObj.deg * Math.PI < fi ) {
 			addDirectionY4 = -1;
 		} else {
 			addDirectionY4 = 1;
 		}
-		let y4: number = (this.selectedObj.y + this.selectedObj.h) - (this.selectedObj.h / 2 + halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirectionY4);
+		let y4: number = (this.selectedObj.y + this.selectedObj.h) - ( this.selectedObj.h / 2 + halfDiagonal * Math.abs(Math.sin( fi - this.selectedObj.deg * Math.PI )) * addDirectionY4);
 
+		let xArr: number[] = [x1, x2, x3, x4].sort();
+		let yArr: number[] = [y1, y2, y3, y4].sort();
 
-		// if (this.selectedObj.deg + fi < Math.PI / 2) {
-		// 	let x1: number = this.selectedObj.x + (this.selectedObj.w / 2 - halfDiagonal * Math.cos(this.selectedObj.deg + fi));
-		// 	let y1: number = this.selectedObj.y - (halfDiagonal * Math.cos( this.selectedObj.deg + fi) - this.selectedObj.h / 2);
+		let points = [
+			{
+				x: x1,
+				y: y1,
+			},
+			{
+				x: x2,
+				y: y2,
+			},
+			{
+				x: x3,
+				y: y3,
+			},
+			{
+				x: x4,
+				y: y4,
+			},
+			{
+				x: x1,
+				y: y1,
+			}
+		];
 
-		// 	let x2: number = (this.selectedObj.x + this.selectedObj.w) + (halfDiagonal * Math.cos( fi - this.selectedObj.deg ) - this.selectedObj.w / 2);
+		return this.ifInPolygon(points, this.cursorX, this.cursorY);
+	}
 
-		// 	let addDirection2 = 1;
-		// 	if (this.selectedObj.deg < fi ) {
-		// 		addDirection2 = -1;
-		// 	} else {
-		// 		addDirection2 = 1;
-		// 	}
-		// 	let y2: number = this.selectedObj.y + (this.selectedObj.h / 2 + halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirection2);
+	private ifInPolygon(points:any, x: number, y: number) {
+		//假设射线线是向x轴正方向发射的
+		let crossNum = 0;
+		for (let i = 0; i < points.length - 1; i++) {
+			//斜率为0
+			if (points[i].y === points[i + 1].y) {
+				if ((y === points[i].y) && 
+					(x >= this.min(points[i].x, points[i+1].x)) &&
+					(x <= this.max(points[i].x, points[i+1].x))) {
+					return true;
+				}
+			}
 
-		// 	let x3: number = (this.selectedObj.x + this.selectedObj.w) - (this.selectedObj.w / 2 - halfDiagonal * Math.cos(this.selectedObj.deg + fi));
-		// 	let y3: number = (this.selectedObj.y + this.selectedObj.h) + (halfDiagonal * Math.cos( this.selectedObj.deg + fi) - this.selectedObj.h / 2);
+			//斜率为1
+			if (points[i].x === points[i + 1].x) {
+				if (x === points[i].x) {
+					return true;
+				} else if (x < points[i].x) {
+					crossNum++;
+				}
+			}
 
-		// 	let x4: number = this.selectedObj.x + this.selectedObj.w / 2 - halfDiagonal * Math.cos( fi - this.selectedObj.deg );
-		// 	let addDirection4 = 1;
-		// 	if (this.selectedObj.deg < fi ) {
-		// 		addDirection4 = -1;
-		// 	} else {
-		// 		addDirection4 = 1;
-		// 	}
-		// 	let y4: number = (this.selectedObj.y + this.selectedObj.h) - (this.selectedObj.h / 2 + halfDiagonal * Math.cos( fi - this.selectedObj.deg ) * addDirection4);
-			
-		// }
-
+			//其它斜率
+			let crossX: number = (y - points[i].y) * (points[i + 1].x - points[i].x) / (points[i + 1].y - points[i].y) + points[i].x;
+			//交叉点，就是鼠标当前点
+			if (crossX === x) {
+				return true;
+			} else if ((crossX > x) && (crossX > this.min(points[i].x, points[i + 1].x)) &&
+				(crossX < this.max(points[i].x, points[i + 1].x))) {
+				crossNum++;//这里crossX等于points[i],或points[i+1]时，不处理，处理也是crossNum+=2,相交于顶点，算两个
+			}
+		}
+		
+		if (crossNum % 2 === 1) {
+			return true;
+		}
 		return false;
+	}
+
+	private max(a: number, b: number): number {
+		if (a > b) {
+			return a;
+		} else {
+			return b;
+		}
+	}
+
+	private min(a: number, b: number): number {
+		if (a < b) {
+			return a;
+		} else {
+			return b;
+		}
 	}
 
 	/**
@@ -256,8 +286,8 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 					this.selectedObj.rotateX += ev.movementX;
 					this.selectedObj.rotateY += ev.movementY;
 				}
-		
 			} else if (this.isKeySDown) {//缩放当个对象
+				//缩放得乘以旋转角度！！！！
 				if (this.selectedObj.w > 10) {
 					this.selectedObj.w += ev.movementX;
 					//旋转中心也得随着变动
@@ -305,6 +335,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	 */
 	@HostListener('mouseup') private onMouseUp() {
 		this.isMouseDown = false;
+		this.isCursorInObj();
 	}
 	/**
 	 * 当鼠标移除绘图区时，不在处理鼠标移动事件
@@ -351,6 +382,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 					if (this.selectedObj.deg >= 1) {
 						this.selectedObj.deg -= 1;
 					}
+					
 					this.clearMap();
 					this.drawMap();
 				}
@@ -358,9 +390,6 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			case 'KeyD':
 				{
 					this.selectedObj.deg -= 0.0375;
-					// if (this.selectedObj.deg >= 1) {
-					// 	this.selectedObj.deg -= 1;
-					// }
 					if ( this.selectedObj.deg < 0) {
 						this.selectedObj.deg += 1;
 					}
