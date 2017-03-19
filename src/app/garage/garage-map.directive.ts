@@ -42,8 +42,8 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 				y: 150,
 				w: 75,
 				h: 75,
-				rotateX: 37.5,
-				rotateY: 37.5,
+				rotateX: 187.5,
+				rotateY: 187.5,
 				deg: 0,
 			},
 			this.selectedObj,
@@ -102,80 +102,85 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	 */
 	@HostListener('mousedown', ['$event']) private onMouseDown(ev) {
 		this.isMouseDown = true;
+		for (let obj of this.objList) {
+			if (this.isCursorInObj(obj)) {
+				this.selectedObj = obj;
+			}
+		}
 	}
 
-	private isCursorInObj(): boolean {
+	private isCursorInObj(obj): boolean {
 		//先求出旋转后被选择对象各个点的坐标
 		//对角线的一半
-		let halfDiagonal: number = Math.sqrt(Math.pow(this.selectedObj.w, 2) + Math.pow(this.selectedObj.h, 2)) / 2;
+		let halfDiagonal: number = Math.sqrt(Math.pow(obj.w, 2) + Math.pow(obj.h, 2)) / 2;
 		//旋转前，对角线与X轴的夹角
-		let fi: number = Math.atan( this.selectedObj.h / this.selectedObj.w );
+		let fi: number = Math.atan( obj.h / obj.w );
 
 		//当旋转角deg与fi之和小于90°时
 		//四个角按照上右下左的顺序
 		let addDirectionX1 = 1;
-		if (this.selectedObj.deg * Math.PI + fi < Math.PI / 2) {//this.selectedObj.deg千万别忘了Math.PI
+		if (obj.deg * Math.PI + fi < Math.PI / 2) {//obj.deg千万别忘了Math.PI
 			addDirectionX1 = -1;
 		} else {
 			addDirectionX1 = 1;
 		}
-		let x1: number = this.selectedObj.x + (this.selectedObj.w / 2 + halfDiagonal * Math.abs(Math.cos(this.selectedObj.deg * Math.PI + fi)) * addDirectionX1);
+		let x1: number = obj.x + (obj.w / 2 + halfDiagonal * Math.abs(Math.cos(obj.deg * Math.PI + fi)) * addDirectionX1);
 
 		let addDirectionY1 = 1;
-		if (this.selectedObj.deg * Math.PI > Math.PI - fi) {
+		if (obj.deg * Math.PI > Math.PI - fi) {
 			addDirectionY1 = 1;
 		} else {
 			addDirectionY1 = -1;
 		}
-		let y1: number = this.selectedObj.y + (this.selectedObj.h / 2 + halfDiagonal * Math.abs(Math.sin( this.selectedObj.deg * Math.PI + fi)) * addDirectionY1);
+		let y1: number = obj.y + (obj.h / 2 + halfDiagonal * Math.abs(Math.sin( obj.deg * Math.PI + fi)) * addDirectionY1);
 
 		let addDirectionX2 = 1;
-		if (this.selectedObj.deg * Math.PI < Math.PI / 2 + fi) {
+		if (obj.deg * Math.PI < Math.PI / 2 + fi) {
 			addDirectionX2 = -1;
 		} else {
 			addDirectionX2 = 1;
 		}
-		let x2: number = (this.selectedObj.x + this.selectedObj.w) - (this.selectedObj.w / 2 + halfDiagonal * Math.abs(Math.cos( fi - this.selectedObj.deg * Math.PI )) * addDirectionX2);
+		let x2: number = (obj.x + obj.w) - (obj.w / 2 + halfDiagonal * Math.abs(Math.cos( fi - obj.deg * Math.PI )) * addDirectionX2);
 
 		let addDirectionY2 = 1;
-		if (this.selectedObj.deg * Math.PI < fi ) {
+		if (obj.deg * Math.PI < fi ) {
 			addDirectionY2 = -1;
 		} else {
 			addDirectionY2 = 1;
 		}
-		let y2: number = this.selectedObj.y + (this.selectedObj.h / 2 + halfDiagonal * Math.abs(Math.sin( fi - this.selectedObj.deg * Math.PI )) * addDirectionY2);
+		let y2: number = obj.y + (obj.h / 2 + halfDiagonal * Math.abs(Math.sin( fi - obj.deg * Math.PI )) * addDirectionY2);
 
 		let addDirectionX3 = 1;
-		if (this.selectedObj.deg * Math.PI < Math.PI / 2 -fi) {
+		if (obj.deg * Math.PI < Math.PI / 2 -fi) {
 			addDirectionX3 = -1
 		} else {
 			addDirectionX3 = 1;
 		}
-		let x3: number = (this.selectedObj.x + this.selectedObj.w) - (this.selectedObj.w / 2 + halfDiagonal * Math.abs(Math.cos(this.selectedObj.deg * Math.PI + fi)) * addDirectionX3);
+		let x3: number = (obj.x + obj.w) - (obj.w / 2 + halfDiagonal * Math.abs(Math.cos(obj.deg * Math.PI + fi)) * addDirectionX3);
 
 		let addDirectionY3 = 1;
-		if (this.selectedObj.deg * Math.PI > Math.PI - fi) {
+		if (obj.deg * Math.PI > Math.PI - fi) {
 			addDirectionY3 = 1;
 		} else {
 			addDirectionY3 = -1;
 		}
-		let y3: number = (this.selectedObj.y + this.selectedObj.h) - (this.selectedObj.h / 2 + halfDiagonal * Math.abs(Math.sin( this.selectedObj.deg * Math.PI + fi)) * addDirectionY3);
+		let y3: number = (obj.y + obj.h) - (obj.h / 2 + halfDiagonal * Math.abs(Math.sin( obj.deg * Math.PI + fi)) * addDirectionY3);
 
 		let addDirectionX4 = 1;
-		if (this.selectedObj.deg * Math.PI < Math.PI / 2 + fi) {
+		if (obj.deg * Math.PI < Math.PI / 2 + fi) {
 			addDirectionX4 = -1;
 		} else {
 			addDirectionX4 = 1;
 		}
-		let x4: number = this.selectedObj.x + (this.selectedObj.w / 2 + halfDiagonal * Math.abs(Math.cos( fi - this.selectedObj.deg * Math.PI )) * addDirectionX4);
+		let x4: number = obj.x + (obj.w / 2 + halfDiagonal * Math.abs(Math.cos( fi - obj.deg * Math.PI )) * addDirectionX4);
 
 		let addDirectionY4 = 1;
-		if (this.selectedObj.deg * Math.PI < fi ) {
+		if (obj.deg * Math.PI < fi ) {
 			addDirectionY4 = -1;
 		} else {
 			addDirectionY4 = 1;
 		}
-		let y4: number = (this.selectedObj.y + this.selectedObj.h) - ( this.selectedObj.h / 2 + halfDiagonal * Math.abs(Math.sin( fi - this.selectedObj.deg * Math.PI )) * addDirectionY4);
+		let y4: number = (obj.y + obj.h) - ( obj.h / 2 + halfDiagonal * Math.abs(Math.sin( fi - obj.deg * Math.PI )) * addDirectionY4);
 
 		let xArr: number[] = [x1, x2, x3, x4].sort();
 		let yArr: number[] = [y1, y2, y3, y4].sort();
@@ -280,7 +285,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 				this.ctx.translate(ev.movementX, ev.movementY);
 			} else if (this.isSpaceDown){//拖拽单个对象
 				//判断鼠标是否点中对象
-				if (this.isCursorInObj()) {
+				if (this.isCursorInObj(this.selectedObj)) {
 					this.selectedObj.x += ev.movementX;
 					this.selectedObj.y += ev.movementY;
 					this.selectedObj.rotateX += ev.movementX;
@@ -335,7 +340,6 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	 */
 	@HostListener('mouseup') private onMouseUp() {
 		this.isMouseDown = false;
-		this.isCursorInObj();
 	}
 	/**
 	 * 当鼠标移除绘图区时，不在处理鼠标移动事件
@@ -356,10 +360,6 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		window.addEventListener('keyup', (ev) => { _this.onKeyUp(ev) });
 		// window.addEventListener('keydown', (ev) => { _this.onKeyDown(ev); });
 		// window.addEventListener('keypress', (ev) => { _this.onKeyPress(ev); });
-	}
-
-	@HostListener('dblclick') private onDblClick() {
-		console.log('dbl');
 	}
 
 	onKeyDown(ev) {
