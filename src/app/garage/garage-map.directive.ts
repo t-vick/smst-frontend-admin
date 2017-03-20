@@ -1,5 +1,7 @@
 import { Directive, ElementRef, HostListener, Input, AfterViewInit, OnChanges, SimpleChange, OnDestroy } from '@angular/core';
 import { Observable }     from 'rxjs/Observable';
+import { Point } from './model/point.model';
+import { Cell } from './model/cell.model';
 @Directive({
 	selector: '[garageMap]',
 
@@ -10,43 +12,22 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	private mapOption: Object;
 	private ctx: any;
 	private isMouseDown: boolean = false;//用于记录鼠标左键是否按下
-	private offsetX: number = 0;//绘图区域坐标原点，相对于整幅地图原点的偏移量
-	private offsetY: number = 0;
-	private topLeftX: number = 0;//窗口左上角，相对于整幅地图原点的坐标
-	private topLeftY: number = 0;//初始值与offsetY相同，从后台获取
-	private locStatusX: number = 20;//鼠标相对于整幅地图的位置的提示信息的位置
-	private locStatusY: number =20;
-	private cursorX: number = 0;//鼠标相对于整个地图的位置
-	private cursorY: number = 0;
+	private offset: Point = new Point(0, 0);//绘图区域坐标原点，相对于整幅地图原点的偏移量
+	private topLeft: Point = new Point(0, 0);//窗口左上角，相对于整幅地图原点的坐标,初始值与offset.y相同，从后台获取
+	private locStatus: Point = new Point(20, 20);//鼠标相对于整幅地图的位置的提示信息的位置
+	private cursor: Point = new Point(0, 0);//鼠标相对于整个地图的位置
 	private selectedObj: any;
 	private keypressSubscription:any;
 	private isSpaceDown: boolean = false;//控制拖动单个对象的开关
 	private isKeySDown: boolean = false;//控制单个对象缩放的开关
-	private objList: any;
+	private cellList: Array<Cell>;
 
 	constructor(private el: ElementRef){
 		this.ctx=this.el.nativeElement.getContext("2d");
-		this.selectedObj = {
-			x: 0,
-			y: 0,
-			w: 75,
-			h: 75,
-			rotateX: 37.5,
-			rotateY: 37.5,
-			deg: 0.25,
-		};
+		this.cellList = [
+			new Cell(150, 150, 75, 75, 187.5, 187.5, 0),
 
-		this.objList = [
-			{
-				x: 150,
-				y: 150,
-				w: 75,
-				h: 75,
-				rotateX: 187.5,
-				rotateY: 187.5,
-				deg: 0,
-			},
-			this.selectedObj,
+			new Cell(0, 0, 75, 75, 37.5,37.5,0.25)
 		]
 
 	};
@@ -60,18 +41,18 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 
 		/**
 		 * 状态栏的位置要去掉画布坐标原点，相对于左上角
-		 * （初始化时的this.offsetX,this.offsetY）的偏移量,
-		 * 初始化时this.offsetX,this.offsetY由后台根据当前人
+		 * （初始化时的this.offset.x,this.offset.y）的偏移量,
+		 * 初始化时this.offset.x,this.offset.y由后台根据当前人
 		 * 的位置返回给前端
 		 */
-		this.locStatusX = 20 - this.offsetX;
-		this.locStatusY = this.el.nativeElement.clientHeight - this.offsetY - 30;
+		this.locStatus.x = 20 - this.offset.x;
+		this.locStatus.y = this.el.nativeElement.clientHeight - this.offset.y - 30;
 		/**
 		 * 调整大小后，要把原点移动到调整大小前的位置
 		 * 否则清空绘图区的时候，有的地方会清理不到
 		 * 因为，此时绘图区域与清理区域没有完全重合
 		 */
-		this.ctx.translate(this.offsetX,this.offsetY);//使绘图区域与清理区域没有完全重合
+		this.ctx.translate(this.offset.x,this.offset.y);//使绘图区域与清理区域没有完全重合
 		
 		this.ctx.lineCap = 'round';
 		this.ctx.lineJoin = 'round';
@@ -102,7 +83,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	 */
 	@HostListener('mousedown', ['$event']) private onMouseDown(ev) {
 		this.isMouseDown = true;
-		for (let obj of this.objList) {
+		for (let obj of this.cellList) {
 			if (this.isCursorInObj(obj)) {
 				this.selectedObj = obj;
 			}
@@ -208,7 +189,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			}
 		];
 
-		return this.ifInPolygon(points, this.cursorX, this.cursorY);
+		return this.ifInPolygon(points, this.cursor.x, this.cursor.y);
 	}
 
 	private ifInPolygon(points:any, x: number, y: number) {
@@ -273,46 +254,48 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		if (this.isMouseDown) {
 			if (!this.isSpaceDown && !this.isKeySDown || 
 				this.isSpaceDown && this.isKeySDown) {//拖拽地图，整体移动
-				this.locStatusX -= ev.movementX;
-				this.locStatusY -= ev.movementY;
+				this.locStatus.x -= ev.movementX;
+				this.locStatus.y -= ev.movementY;
 				//累加坐标原点相对于整幅地图原点的偏移量
-				this.offsetX += ev.movementX;
-				this.offsetY += ev.movementY;
+				this.offset.x += ev.movementX;
+				this.offset.y += ev.movementY;
 				//累加窗口左上角，相对整幅地图原点的总偏移量
-				this.topLeftX -= ev.movementX;
-				this.topLeftY -= ev.movementY;
+				this.topLeft.x -= ev.movementX;
+				this.topLeft.y -= ev.movementY;
 
 				this.ctx.translate(ev.movementX, ev.movementY);
 			} else if (this.isSpaceDown){//拖拽单个对象
 				//判断鼠标是否点中对象
-				if (this.isCursorInObj(this.selectedObj)) {
-					this.selectedObj.x += ev.movementX;
-					this.selectedObj.y += ev.movementY;
-					this.selectedObj.rotateX += ev.movementX;
-					this.selectedObj.rotateY += ev.movementY;
+				if (this.selectedObj) {
+					if (this.isCursorInObj(this.selectedObj)) {
+						this.selectedObj.x += ev.movementX;
+						this.selectedObj.y += ev.movementY;
+						this.selectedObj.rotateX += ev.movementX;
+						this.selectedObj.rotateY += ev.movementY;
+					}
 				}
+
 			} else if (this.isKeySDown) {//缩放当个对象
-				//缩放得乘以旋转角度！！！！
-				if (this.selectedObj.w > 10) {
-					this.selectedObj.w += ev.movementX;
-					//旋转中心也得随着变动
-					this.selectedObj.rotateX += ev.movementX / 2;
-				} else if (ev.movementX > 0) {
-					this.selectedObj.w += ev.movementX;
-					//旋转中心也得随着变动
-					this.selectedObj.rotateX += ev.movementX / 2;
+				if (this.selectedObj) {
+					//缩放得乘以旋转角度！！！！
+					if (this.selectedObj.w > 10) {
+						this.selectedObj.w += ev.movementX;
+						//旋转中心也得随着变动
+						this.selectedObj.rotateX += ev.movementX / 2;
+					} else if (ev.movementX > 0) {
+						this.selectedObj.w += ev.movementX;
+						//旋转中心也得随着变动
+						this.selectedObj.rotateX += ev.movementX / 2;
+					}
+
+					if (this.selectedObj.h > 10) {
+						this.selectedObj.h += ev.movementY;
+						this.selectedObj.rotateY += ev.movementY / 2;
+					} else if (ev.movementY > 0) {//小于或等于10时，只能放大
+						this.selectedObj.h += ev.movementY;
+						this.selectedObj.rotateY += ev.movementY / 2;
+					}
 				}
-
-				if (this.selectedObj.h > 10) {
-					this.selectedObj.h += ev.movementY;
-					this.selectedObj.rotateY += ev.movementY / 2;
-				} else if (ev.movementY > 0) {//小于或等于10时，只能放大
-					this.selectedObj.h += ev.movementY;
-					this.selectedObj.rotateY += ev.movementY / 2;
-				}
-
-
-				
 			}
 
 
@@ -322,14 +305,14 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		}
 		/**
 		 * 记录鼠标的当前位置,必须放到处理地图拖拽之后
-		 * 否则当this.offsetX,this.offsetY变化的时候，
-		 * 不能把变化量累加到this.cursorX,this.cursorY
+		 * 否则当this.offset.x,this.offset.y变化的时候，
+		 * 不能把变化量累加到this.cursor.x,this.cursor.y
 		 * 从而导致，当拖拽地图后，鼠标不能准确的点中
 		 * 要拖拽的对象，使对象不能拖拽
 		 */
 		//计算鼠标相对于整幅地图原点的坐标
-		this.cursorX = this.topLeftX + ev.layerX;
-		this.cursorY = this.topLeftY + ev.layerY;
+		this.cursor.x = this.topLeft.x + ev.layerX;
+		this.cursor.y = this.topLeft.y + ev.layerY;
 		this.clearMap();
 
 		this.drawMap();
@@ -377,24 +360,29 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		switch(ev.code) {
 			case 'KeyA':
 				{
-					this.selectedObj.deg += 0.0375;
-					//对于简单的矩形而言，当deg大于1(180°),就进入循环了
-					if (this.selectedObj.deg >= 1) {
-						this.selectedObj.deg -= 1;
+					if (this.selectedObj) {
+						this.selectedObj.deg += 0.0375;
+						//对于简单的矩形而言，当deg大于1(180°),就进入循环了
+						if (this.selectedObj.deg >= 1) {
+							this.selectedObj.deg -= 1;
+						}
+						
+						this.clearMap();
+						this.drawMap();
 					}
-					
-					this.clearMap();
-					this.drawMap();
 				}
 				break;
 			case 'KeyD':
 				{
-					this.selectedObj.deg -= 0.0375;
-					if ( this.selectedObj.deg < 0) {
-						this.selectedObj.deg += 1;
+					if (this.selectedObj) {
+						this.selectedObj.deg -= 0.0375;
+						if ( this.selectedObj.deg < 0) {
+							this.selectedObj.deg += 1;
+						}
+						this.clearMap();
+						this.drawMap();
 					}
-					this.clearMap();
-					this.drawMap();
+
 				}
 				break;
 			case 'KeyS': 
@@ -440,7 +428,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	 * 清空绘图区域
 	 */
 	private clearMap() {
-		this.ctx.clearRect(-this.offsetX,-this.offsetY,this.el.nativeElement.clientWidth,this.el.nativeElement.clientHeight);
+		this.ctx.clearRect(-this.offset.x,-this.offset.y,this.el.nativeElement.clientWidth,this.el.nativeElement.clientHeight);
 	}
 
 	/**
@@ -448,10 +436,16 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	 */
 	private drawMap() {
 		this.ctx.fillStyle = '#000000';
-		this.ctx.fillText(`X:${this.cursorX} | Y:${this.cursorY}`,this.locStatusX,this.locStatusY);
+		this.ctx.fillText(`X:${this.cursor.x} | Y:${this.cursor.y}`,this.locStatus.x,this.locStatus.y);
 		this.ctx.fillStyle = '#ff0000';
-		// this.ctx.fillRect(this.selectedObj.x,this.selectedObj.y,this.selectedObj.w,this.selectedObj.h);
-		for (let obj of this.objList) {
+		this.drawCells();
+	}
+
+	/**
+	 * 画车位
+	 */
+	private drawCells() {
+		for (let obj of this.cellList) {
 			this.ctx.save();
 			this.ctx.translate(obj.rotateX, obj.rotateY);
 			this.ctx.rotate(Math.PI*obj.deg);
@@ -459,13 +453,47 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			this.ctx.fillRect(obj.x,obj.y,obj.w,obj.h);
 			this.ctx.restore();
 		}
-		// this.ctx.save();
-		// this.ctx.translate(this.selectedObj.rotateX, this.selectedObj.rotateY);
-		// this.ctx.rotate(Math.PI*this.selectedObj.deg);
-		// this.ctx.translate(-this.selectedObj.rotateX, -this.selectedObj.rotateY);
-		// this.ctx.fillRect(this.selectedObj.x,this.selectedObj.y,this.selectedObj.w,this.selectedObj.h);
-		// this.ctx.restore();
+
+		// this.ctx.setFillStyle('green');
+		// this.ctx.setFontSize(30);
+		// for (let cell of cellList) {
+		//     this.ctx.setFillStyle('green');
+		//     this.ctx.fillRect(cell.x, cell.y, cell.w, cell.h);
+		//     this.ctx.setFillStyle('black');
+		//     this.ctx.fillText(cell.num.text, cell.num.x, cell.num.y);
+
+		// }
 	}
+
+	/**
+	 * 画道路
+	 */
+	// private drawPaths (pathList) {
+	//     this.ctx.setStrokeStyle('blue');
+	//     // this.ctx.beginPath();
+	//     for (let path of pathList) {
+	//         this.ctx.setLineWidth(path.width);
+	//         this.ctx.moveTo(path.startX, path.startY);
+	//         this.ctx.lineTo(path.endX, path.endY);
+	//         // this.ctx.stroke();//这句代码不能放在这里，否则线条的透明不不一致，
+	//     }
+	//     this.ctx.stroke();//放在这里才能保证画出的线条的透明度一致
+	// }
+
+	/**
+	 * 画立柱
+	 */
+	// private drawCylinders(cylinderList) {
+	//     // this.ctx.beginPath();
+	//     this.ctx.setFillStyle('green');
+	//     for (let cylinder of cylinderList) {
+	//         this.ctx.beginPath();
+	//         this.ctx.arc(cylinder.x,cylinder.y,cylinder.r,0,2 * Math.PI);
+	//         this.ctx.fill();
+	//     }
+	// }
+
+
 
 	/**
 	 * 重绘鼠标位置状态
@@ -473,7 +501,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	// private drawCursorLoc() {
 	// 	this.ctx.save();
 	// 	this.ctx.fillStyle = '#000000';
-	// 	this.ctx.fillText(`X:${this.cursorX} | Y:${this.cursorY}`,this.locStatusX,this.locStatusY);
+	// 	this.ctx.fillText(`X:${this.cursor.x} | Y:${this.cursor.y}`,this.locStatus.x,this.locStatus.y);
 	// 	this.ctx.fillStyle = '#ff0000';
 	// 	this.ctx.restore();
 	// }
