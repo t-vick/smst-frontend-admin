@@ -2,6 +2,7 @@ import { Directive, ElementRef, HostListener, Input, AfterViewInit, OnChanges, S
 import { Observable }     from 'rxjs/Observable';
 import { Point } from './model/point.model';
 import { Cell } from './model/cell.model';
+import { Road } from './model/road.model';
 @Directive({
 	selector: '[garageMap]',
 
@@ -270,8 +271,8 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 					if (this.isCursorInObj(this.selectedObj)) {
 						this.selectedObj.x += ev.movementX;
 						this.selectedObj.y += ev.movementY;
-						this.selectedObj.rotateX += ev.movementX;
-						this.selectedObj.rotateY += ev.movementY;
+						this.selectedObj.rx += ev.movementX;
+						this.selectedObj.ry += ev.movementY;
 					}
 				}
 
@@ -281,19 +282,19 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 					if (this.selectedObj.w > 10) {
 						this.selectedObj.w += ev.movementX;
 						//旋转中心也得随着变动
-						this.selectedObj.rotateX += ev.movementX / 2;
+						this.selectedObj.rx += ev.movementX / 2;
 					} else if (ev.movementX > 0) {
 						this.selectedObj.w += ev.movementX;
 						//旋转中心也得随着变动
-						this.selectedObj.rotateX += ev.movementX / 2;
+						this.selectedObj.rx += ev.movementX / 2;
 					}
 
 					if (this.selectedObj.h > 10) {
 						this.selectedObj.h += ev.movementY;
-						this.selectedObj.rotateY += ev.movementY / 2;
+						this.selectedObj.ry += ev.movementY / 2;
 					} else if (ev.movementY > 0) {//小于或等于10时，只能放大
 						this.selectedObj.h += ev.movementY;
-						this.selectedObj.rotateY += ev.movementY / 2;
+						this.selectedObj.ry += ev.movementY / 2;
 					}
 				}
 			}
@@ -439,6 +440,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		this.ctx.fillText(`X:${this.cursor.x} | Y:${this.cursor.y}`,this.locStatus.x,this.locStatus.y);
 		this.ctx.fillStyle = '#ff0000';
 		this.drawCells();
+		this.drawRoads(2);
 	}
 
 	/**
@@ -447,9 +449,9 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	private drawCells() {
 		for (let obj of this.cellList) {
 			this.ctx.save();
-			this.ctx.translate(obj.rotateX, obj.rotateY);
+			this.ctx.translate(obj.rx, obj.ry);
 			this.ctx.rotate(Math.PI*obj.deg);
-			this.ctx.translate(-obj.rotateX, -obj.rotateY);
+			this.ctx.translate(-obj.rx, -obj.ry);
 			this.ctx.fillRect(obj.x,obj.y,obj.w,obj.h);
 			this.ctx.restore();
 		}
@@ -468,17 +470,25 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	/**
 	 * 画道路
 	 */
-	// private drawPaths (pathList) {
-	//     this.ctx.setStrokeStyle('blue');
-	//     // this.ctx.beginPath();
-	//     for (let path of pathList) {
-	//         this.ctx.setLineWidth(path.width);
-	//         this.ctx.moveTo(path.startX, path.startY);
-	//         this.ctx.lineTo(path.endX, path.endY);
-	//         // this.ctx.stroke();//这句代码不能放在这里，否则线条的透明不不一致，
-	//     }
-	//     this.ctx.stroke();//放在这里才能保证画出的线条的透明度一致
-	// }
+	private drawRoads (roadList) {
+		roadList = [
+			new Road(-10, 250, 400, 250, 20),
+			new Road(-10, 400, 400, 400, 20),
+			new Road(30, -10, 30, 800, 20),
+			new Road(330, -10, 330, 800, 20),
+    	];
+	    this.ctx.strokeStyle = 'blue';
+	    this.ctx.beginPath();//只写了这个，才能重绘道路，不然会有重影
+	    for (let road of roadList) {
+	        this.ctx.lineWidth = road.w;
+	        this.ctx.moveTo(road.x, road.y);
+	        this.ctx.lineTo(road.ex, road.ey);
+	        // this.ctx.stroke();//这句代码不能放在这里，否则线条的透明不不一致，
+	    }
+	    this.ctx.stroke();//放在这里才能保证画出的线条的透明度一致
+	    this.ctx.closePath();
+	    // this.ctx.draw();
+	}
 
 	/**
 	 * 画立柱

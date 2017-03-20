@@ -7,8 +7,8 @@ export class Cell {
 		public y: number, 
 		public w: number, 
 		public h: number,
-		public rotateX: number,
-		public rotateY: number,
+		public rx: number,
+		public ry: number,
 		public deg: number){
 	}
 }
