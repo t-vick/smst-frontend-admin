@@ -22,6 +22,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	private isSpaceDown: boolean = false;//控制拖动单个对象的开关
 	private isKeySDown: boolean = false;//控制单个对象缩放的开关
 	private cellList: Array<Cell>;
+	private roadList: Array<Road>;
 
 	constructor(private el: ElementRef){
 		this.ctx=this.el.nativeElement.getContext("2d");
@@ -29,7 +30,14 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			new Cell(150, 150, 75, 75, 187.5, 187.5, 0),
 
 			new Cell(0, 0, 75, 75, 37.5,37.5,0.25)
-		]
+		];
+
+		this.roadList = [
+			new Road(-10, 250, 400, 250, 20),
+			new Road(-10, 400, 400, 400, 20),
+			new Road(30, -10, 30, 800, 20),
+			new Road(330, -10, 330, 800, 20),
+    	];
 
 	};
 
@@ -89,9 +97,37 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 				this.selectedObj = obj;
 			}
 		}
+
+		for (let obj of this.roadList) {
+			if (this.isCursorInObj(obj)) {
+				this.selectedObj = obj;
+			}
+		}
 	}
 
-	private isCursorInObj(obj): boolean {
+	private isCursorInObj(currObj): boolean {
+		//如果是道路，先转换成矩形区域
+		let obj: any = {};
+		Object.assign(obj, currObj);
+		if (currObj instanceof Road) {
+			let x: number,y: number, w: number, h: number;
+			if (obj.y === obj.ey) {
+				x = obj.x;
+				y = obj.y - obj.w / 2;
+				w = Math.abs(obj.ey - obj.y);
+				h = obj.w;
+			} else if (obj.x === obj.ex) {
+				x = obj.x - obj.w / 2;
+				y = obj.y;
+				w = obj.w;
+				h = Math.abs(obj.ey - obj.y);
+			}
+
+			let rx = (obj.x + obj.ex) / 2;
+			let ry = (obj.y + obj.ey) / 2 ;
+
+			obj = new Cell(x, y, w, h, rx, ry, 0);
+		}
 		//先求出旋转后被选择对象各个点的坐标
 		//对角线的一半
 		let halfDiagonal: number = Math.sqrt(Math.pow(obj.w, 2) + Math.pow(obj.h, 2)) / 2;
@@ -189,7 +225,10 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 				y: y1,
 			}
 		];
-
+console.log(x1, y1);
+console.log(x2, y2);
+console.log(x3, y3);
+console.log(x4, y4);
 		return this.ifInPolygon(points, this.cursor.x, this.cursor.y);
 	}
 
@@ -208,9 +247,9 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 
 			//斜率为1
 			if (points[i].x === points[i + 1].x) {
-				if (x === points[i].x) {
-					return true;
-				} else if (x < points[i].x) {
+				if ((x <= points[i].x ) &&
+					(y >= this.min(points[i].y, points[i+1].y)) &&
+					(y <= this.max(points[i].y, points[i+1].y))) {
 					crossNum++;
 				}
 			}
@@ -218,9 +257,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			//其它斜率
 			let crossX: number = (y - points[i].y) * (points[i + 1].x - points[i].x) / (points[i + 1].y - points[i].y) + points[i].x;
 			//交叉点，就是鼠标当前点
-			if (crossX === x) {
-				return true;
-			} else if ((crossX > x) && (crossX > this.min(points[i].x, points[i + 1].x)) &&
+			if ((crossX >= x) && (crossX > this.min(points[i].x, points[i + 1].x)) &&
 				(crossX < this.max(points[i].x, points[i + 1].x))) {
 				crossNum++;//这里crossX等于points[i],或points[i+1]时，不处理，处理也是crossNum+=2,相交于顶点，算两个
 			}
@@ -269,10 +306,18 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 				//判断鼠标是否点中对象
 				if (this.selectedObj) {
 					if (this.isCursorInObj(this.selectedObj)) {
-						this.selectedObj.x += ev.movementX;
-						this.selectedObj.y += ev.movementY;
-						this.selectedObj.rx += ev.movementX;
-						this.selectedObj.ry += ev.movementY;
+						if (this.selectedObj instanceof Cell) {
+							this.selectedObj.x += ev.movementX;
+							this.selectedObj.y += ev.movementY;
+							this.selectedObj.rx += ev.movementX;
+							this.selectedObj.ry += ev.movementY;
+						} else if (this.selectedObj instanceof Road) {
+							this.selectedObj.x += ev.movementX;
+							this.selectedObj.y += ev.movementY;
+							this.selectedObj.ex += ev.movementX;
+							this.selectedObj.ey += ev.movementY;
+						}
+				
 					}
 				}
 
@@ -367,7 +412,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 						if (this.selectedObj.deg >= 1) {
 							this.selectedObj.deg -= 1;
 						}
-						
+						this.isCursorInObj(this.selectedObj);
 						this.clearMap();
 						this.drawMap();
 					}
@@ -440,7 +485,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		this.ctx.fillText(`X:${this.cursor.x} | Y:${this.cursor.y}`,this.locStatus.x,this.locStatus.y);
 		this.ctx.fillStyle = '#ff0000';
 		this.drawCells();
-		this.drawRoads(2);
+		this.drawRoads(this.roadList);
 	}
 
 	/**
@@ -471,12 +516,6 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	 * 画道路
 	 */
 	private drawRoads (roadList) {
-		roadList = [
-			new Road(-10, 250, 400, 250, 20),
-			new Road(-10, 400, 400, 400, 20),
-			new Road(30, -10, 30, 800, 20),
-			new Road(330, -10, 330, 800, 20),
-    	];
 	    this.ctx.strokeStyle = 'blue';
 	    this.ctx.beginPath();//只写了这个，才能重绘道路，不然会有重影
 	    for (let road of roadList) {
