@@ -1,135 +1,36 @@
-import { Component, ElementRef, DoCheck, AfterViewInit } from '@angular/core';
-
+import { Component, ElementRef, DoCheck, OnInit, AfterViewInit } from '@angular/core';
+import { MdDialog } from '@angular/material';
+import { GarageObjAddComponent } from '../garage-obj-add/garage-obj-add.component';
+import { Cell } from '../model/cell.model';
+import { Road } from '../model/road.model';
 @Component({
 	moduleId: module.id,
 	selector: 'smst-garage-map',
 	templateUrl: './garage-map.component.html',
 	styleUrls: [ './garage-map.component.css' ],
 })
-export class GarageMapComponent implements DoCheck, AfterViewInit {
-	private option = {
-    option: {
-      offsetX: 0,//画布左上角坐标,相对于整幅地图坐标原点的偏移量
-      offsetY: 0,
-      pillarList: [//方形柱子
-      {
-        x: 150,
-        y: 150,
-        width: 10,
-        height: 10
-      },
-      {
-        x: 150,
-        y: 200,
-        width: 10,
-        height: 10
-      }
-    ],
-    cylinderList: [//圆形柱子
-      {
-        x: 50,
-        y: 270,
-        r: 5
-      },
-      {
-        x: 310,
-        y: 270,
-        r: 5
-      },
-      {
-        x: 50,
-        y: 380,
-        r: 5
-      },
-      {
-        x: 310,
-        y: 380,
-        r: 5
-      }
-    ],
-      pathList: [//道路
-      {
-        startX: -10,
-        endX: 400,
-        startY: 250,
-        endY: 250,
-        width: 20,
-        rotateX: 195,
-        rotateY: 250,
-        deg: 0.25,
-      },
-       {
-        startX: -10,
-        endX: 400,
-        startY: 400,
-        endY: 400,
-        width: 20,
-        rotateX: 195,
-        rotateY: 250,
-        deg: 0.25,
-      },
-       {
-        startX: 30,
-        endX: 30,
-        startY: -10,
-        endY: 800,
-        width: 20,
-        rotateX: 195,
-        rotateY: 250,
-        deg: 0.25,
-      },
-       {
-        startX: 330,
-        endX: 330,
-        startY: -10,
-        endY: 800,
-        width: 20,
-        rotateX: 195,
-        rotateY: 250,
-        deg: 0.25,
-      }
-    ],
-    cellList: [
-      {
-        x: 60,
-        y: 275,
-        w: 78,
-        h: 100,
-        num: {//编号及其坐标
-          x: 80,
-          y: 300,
-          text: '301'
-        }
-      },
-      {
-        x: 140,
-        y: 275,
-        w: 78,
-        h: 100,
-        num: {
-          x: 160,
-          y: 300,
-          text: '302',
-        }
-      },
-      {
-        x: 220,
-        y: 275,
-        w: 78,
-        h: 100,
-        num: {
-          x: 240,
-          y: 300,
-          text: '303'
-        }
-      }
-    ]
-    }
-  };
+export class GarageMapComponent implements OnInit, DoCheck, AfterViewInit {
+  private option: any;
 
   private boxSize: number;
-  constructor(private el: ElementRef) {
+  constructor(private el: ElementRef, private dialog: MdDialog) {
   	
+  }
+
+  ngOnInit() {
+    this.option = {
+      cellList: [
+        new Cell({x: 150, y: 150, w: 75, h: 75, rx: 187.5, ry: 187.5, deg: 0}),
+
+        new Cell({x: 0, y: 0, w: 75, h: 75, rx: 37.5,ry: 37.5, deg: 0.25})
+      ],
+      roadList: [
+        new Road({x: -10, y: 250, ex: 400, ey: 250, lw: 20, rx: 195, ry: 250, hl: 205, deg: 0}),
+        new Road({x: -10, y: 400, ex: 400, ey: 400, lw: 20, rx: 195, ry: 400, hl: 205, deg: 0}),
+        new Road({x: 30, y: -10, ex: 30, ey: 800, lw: 20, rx: 30, ry: 395, hl: 405, deg: 0.5}),
+        new Road({x: 330, y: -10, ex: 330, ey: 800, lw: 20, rx: 330, ry: 395, hl: 405, deg: 0.5}),
+      ],
+    }
   }
 
   ngDoCheck() {
@@ -139,5 +40,12 @@ export class GarageMapComponent implements DoCheck, AfterViewInit {
 
   ngAfterViewInit() {
   	this.boxSize = this.el.nativeElement.clientWidth * this.el.nativeElement.clientHeight;
+  }
+
+  openDialog() {
+    let dialogRef = this.dialog.open(GarageObjAddComponent);
+    dialogRef.afterClosed().subscribe(result => {
+
+    });
   }
 }

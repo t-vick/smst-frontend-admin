@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener, Input, AfterViewInit, OnChanges, SimpleChange, OnDestroy } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, OnInit, AfterViewInit, OnChanges, SimpleChange, OnDestroy } from '@angular/core';
 import { Observable }     from 'rxjs/Observable';
 import { Point } from './model/point.model';
 import { Cell } from './model/cell.model';
@@ -7,10 +7,10 @@ import { Road } from './model/road.model';
 	selector: '[garageMap]',
 
 })
-export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
+export class GarageMapDirective implements OnInit, AfterViewInit, OnChanges, OnDestroy {
 	@Input() private size: any;//输入属性，当父窗的大小改变时，引发size改变
 	@Input('garageMap')
-	private mapOption: Object;
+	private mapOption: any;
 	private ctx: any;
 	private isMouseDown: boolean = false;//用于记录鼠标左键是否按下
 	private offset: Point = new Point(0, 0);//绘图区域坐标原点，相对于整幅地图原点的偏移量
@@ -26,20 +26,12 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 
 	constructor(private el: ElementRef){
 		this.ctx=this.el.nativeElement.getContext("2d");
-		this.cellList = [
-			new Cell({x: 150, y: 150, w: 75, h: 75, rx: 187.5, ry: 187.5, deg: 0}),
-
-			new Cell({x: 0, y: 0, w: 75, h: 75, rx: 37.5,ry: 37.5, deg: 0.25})
-		];
-
-		this.roadList = [
-			new Road({x: -10, y: 250, ex: 400, ey: 250, w: 20, rx: 195, ry: 250, hl: 205, deg: 0}),
-			new Road({x: -10, y: 400, ex: 400, ey: 400, w: 20, rx: 195, ry: 400, hl: 205, deg: 0}),
-			new Road({x: 30, y: -10, ex: 30, ey: 800, w: 20, rx: 30, ry: 395, hl: 405, deg: 0.5}),
-			new Road({x: 330, y: -10, ex: 330, ey: 800, w: 20, rx: 330, ry: 395, hl: 405, deg: 0.5}),
-    	];
-
 	};
+
+	ngOnInit() {
+		this.cellList = this.mapOption.cellList;
+		this.roadList = this.mapOption.roadList;
+	}
 
 	/**
 	 * 调整画布大小，初始化画布重绘地图
@@ -112,9 +104,9 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		if (currObj instanceof Road) {
 			let x: number,y: number, w: number, h: number;
 				x = obj.rx - obj.hl;
-				y = obj.ry - obj.w / 2;
+				y = obj.ry - obj.lw / 2;
 				w = obj.hl * 2;
-				h = obj.w;
+				h = obj.lw;
 				let {rx, ry, deg} = obj;
 				obj = new Cell({x, y, w, h, rx, ry, deg: deg});
 		}
@@ -404,8 +396,6 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			case 'KeyS': 
 				{
 					this.isKeySDown = !this.isKeySDown;
-					this.clearMap();
-					this.drawMap();
 				}
 				break;
 			case 'Space':
@@ -489,7 +479,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	    this.ctx.strokeStyle = 'blue';
 	    this.ctx.beginPath();//只写了这个，才能重绘道路，不然会有重影
 	    for (let road of roadList) {
-	        this.ctx.lineWidth = road.w;
+	        this.ctx.lineWidth = road.lw;
 	        this.ctx.moveTo(road.x, road.y);
 	        this.ctx.lineTo(road.ex, road.ey);
 	        // this.ctx.stroke();//这句代码不能放在这里，否则线条的透明不不一致，
@@ -525,7 +515,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	// }
 
 	ngOnDestroy() {
-
+		window.removeEventListener('keyup');
 	}
 
 }

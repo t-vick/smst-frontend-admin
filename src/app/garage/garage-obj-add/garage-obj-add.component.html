@@ -1,0 +1,49 @@
+<h1 md-dialog-title>添加图形</h1>
+<div md-dialog-content>
+	<form class="example-form">
+		<p>
+	    <md-select class="example-full-width" placeholder="图形类别" [(ngModel)]="selectedValue" name="type" (change)="selectChanged($event);">
+	      <md-option *ngFor="let type of types" [value]="type.value">
+	        {{type.viewValue}}
+	      </md-option>
+	    </md-select>
+		</p>
+	  <table class="example-full-width" cellspacing="0"><tr>
+	    <td><md-input-container class="example-full-width">
+	      <input mdInput placeholder="X坐标" type="number">
+	    </md-input-container></td>
+	    <td><md-input-container class="example-full-width">
+	      <input mdInput placeholder="Y坐标" type="number">
+	    </md-input-container></td>
+	  </tr></table>
+	  <table class="example-full-width" cellspacing="0"><tr>
+	    <td><md-input-container class="example-full-width">
+	      <input mdInput placeholder="终止X坐标" type="number">
+	    </md-input-container></td>
+	    <td><md-input-container class="example-full-width">
+	      <input mdInput placeholder="终止Y坐标" type="number">
+	    </md-input-container></td>
+	  </tr></table>
+	  <table class="example-full-width" cellspacing="0"><tr>
+	    <td><md-input-container class="example-full-width">
+	      <input mdInput placeholder="宽度" type="number">
+	    </md-input-container></td>
+	    <td><md-input-container class="example-full-width">
+	      <input mdInput placeholder="高度" type="number">
+	    </md-input-container></td>
+	  </tr></table>
+	  <table class="example-full-width" cellspacing="0"><tr>
+	    <td><md-input-container class="example-full-width">
+	      <input mdInput placeholder="线宽" type="number">
+	    </md-input-container></td>
+	    <td><md-input-container class="example-full-width">
+	      <input mdInput placeholder="旋转" type="number">
+	    </md-input-container></td>
+	  </tr></table>
+	</form>
+</div>
+<div md-dialog-actions fxLayoutAlign="space-between">
+  <button md-button (click)="dialogRef.close('Option 1')">取&nbsp;&nbsp;消</button>
+  <button md-button (click)="dialogRef.close('Option 2')">保&nbsp;&nbsp;存</button>
+</div>
+

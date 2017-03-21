@@ -8,6 +8,7 @@ import { DataTableModule } from "angular2-datatable";
 import { GarageListComponent } from './garage-list/garage-list.component';
 import { GarageMapComponent } from './garage-map/garage-map.component';
 import { GarageAddComponent } from './garage-add/garage-add.component';
+import { GarageObjAddComponent } from './garage-obj-add/garage-obj-add.component';
 
 import { GarageMapDirective } from './garage-map.directive';
 
@@ -17,6 +18,7 @@ import { GarageRoutingModule } from './garage-routing.module';
 		GarageListComponent,
 		GarageMapComponent,
 		GarageAddComponent,
+		GarageObjAddComponent,
 		GarageMapDirective
 	],
 	imports: [
@@ -30,7 +32,9 @@ import { GarageRoutingModule } from './garage-routing.module';
 	exports: [
 		GarageListComponent,
 	],
-	entryComponents: [ GarageAddComponent ]
+	entryComponents: [ 	GarageAddComponent,
+						GarageObjAddComponent,
+	],
 })
 export class GarageModule {
 

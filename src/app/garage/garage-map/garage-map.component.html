@@ -1,3 +1,18 @@
 <div class="smst-admin-map">
+<md-toolbar color="primary" fxLayoutAlign="end">
+<!--   <span>Application Title</span> -->
+
+  <!-- This fills the remaining space of the current row -->
+  <span class="example-fill-remaining-space">
+  	<md-toolbar-row>
+  	  <!-- <span>Third Line</span> -->
+  	  <!-- <span class="example-spacer">hhhhhh</span> -->
+  	  <md-icon class="example-icon">edit</md-icon>
+  	  <md-icon class="example-icon" (click)="openDialog();">add</md-icon>
+  	</md-toolbar-row>
+  </span>
+
+<!--   <span>Right Aligned Text</span> -->
+</md-toolbar>
 	<canvas style="cursor: pointer" fxFlexFill id="map" [garageMap]="option" [size]="boxSize"></canvas>
 </div>
