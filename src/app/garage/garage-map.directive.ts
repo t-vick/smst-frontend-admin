@@ -27,16 +27,16 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	constructor(private el: ElementRef){
 		this.ctx=this.el.nativeElement.getContext("2d");
 		this.cellList = [
-			new Cell(150, 150, 75, 75, 187.5, 187.5, 0),
+			new Cell({x: 150, y: 150, w: 75, h: 75, rx: 187.5, ry: 187.5, deg: 0}),
 
-			new Cell(0, 0, 75, 75, 37.5,37.5,0.25)
+			new Cell({x: 0, y: 0, w: 75, h: 75, rx: 37.5,ry: 37.5, deg: 0.25})
 		];
 
 		this.roadList = [
-			new Road(-10, 250, 400, 250, 20),
-			new Road(-10, 400, 400, 400, 20),
-			new Road(30, -10, 30, 800, 20),
-			new Road(330, -10, 330, 800, 20),
+			new Road({x: -10, y: 250, ex: 400, ey: 250, w: 20, rx: 195, ry: 250, hl: 205, deg: 0}),
+			new Road({x: -10, y: 400, ex: 400, ey: 400, w: 20, rx: 195, ry: 400, hl: 205, deg: 0}),
+			new Road({x: 30, y: -10, ex: 30, ey: 800, w: 20, rx: 30, ry: 395, hl: 405, deg: 0.5}),
+			new Road({x: 330, y: -10, ex: 330, ey: 800, w: 20, rx: 330, ry: 395, hl: 405, deg: 0.5}),
     	];
 
 	};
@@ -111,22 +111,34 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		Object.assign(obj, currObj);
 		if (currObj instanceof Road) {
 			let x: number,y: number, w: number, h: number;
-			if (obj.y === obj.ey) {
-				x = obj.x;
-				y = obj.y - obj.w / 2;
-				w = Math.abs(obj.ex - obj.x);
+			// if (obj.y === obj.ey) {
+			// 	x = obj.x;
+			// 	y = obj.y - obj.w / 2;
+			// 	w = Math.abs(obj.ex - obj.x);
+			// 	h = obj.w;
+			// 	let rx = (obj.x + obj.ex) / 2;
+			// 	let ry = (obj.y + obj.ey) / 2 ;
+			// 	obj = new Cell({x, y, w, h, rx, ry, deg:0});
+			// } else if (obj.x === obj.ex) {
+			// 	x = obj.x - obj.w / 2;
+			// 	y = obj.y;
+			// 	w = obj.w;
+			// 	h = Math.abs(obj.ey - obj.y);
+			// 	let rx = (obj.x + obj.ex) / 2;
+			// 	let ry = (obj.y + obj.ey) / 2 ;
+			// 	obj = new Cell({x, y, w, h, rx, ry, deg:0});
+			// } else {
+				x = obj.rx - obj.hl;
+				y = obj.ry - obj.w / 2;
+				w = obj.hl * 2;
 				h = obj.w;
-			} else if (obj.x === obj.ex) {
-				x = obj.x - obj.w / 2;
-				y = obj.y;
-				w = obj.w;
-				h = Math.abs(obj.ey - obj.y);
-			}
+				let {rx, ry, deg} = obj;
+				obj = new Cell({x, y, w, h, rx, ry, deg: deg});
+			// }
 
-			let rx = (obj.x + obj.ex) / 2;
-			let ry = (obj.y + obj.ey) / 2 ;
 
-			obj = new Cell(x, y, w, h, rx, ry, 0);
+
+			// obj = new Cell({x, y, w, h, rx, ry, deg:0});
 		}
 		//先求出旋转后被选择对象各个点的坐标
 		//对角线的一半
@@ -309,6 +321,8 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 							this.selectedObj.y += ev.movementY;
 							this.selectedObj.ex += ev.movementX;
 							this.selectedObj.ey += ev.movementY;
+							this.selectedObj.rx += ev.movementX;
+							this.selectedObj.ry += ev.movementY;
 						}
 				
 					}
@@ -400,11 +414,31 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			case 'KeyA':
 				{
 					if (this.selectedObj) {
-						this.selectedObj.deg += 0.0375;
-						//对于简单的矩形而言，当deg大于1(180°),就进入循环了
-						if (this.selectedObj.deg >= 1) {
-							this.selectedObj.deg -= 1;
+						if (this.selectedObj instanceof Cell) {
+							this.selectedObj.deg += 0.0125;
+							//对于简单的矩形而言，当deg大于1(180°),就进入循环了
+							if (this.selectedObj.deg >= 1) {
+								this.selectedObj.deg -= 1;
+							}
+						} else if (this.selectedObj instanceof Road) {
+							this.selectedObj.deg += 0.0125;
+							if (this.selectedObj.deg >=1) {
+								this.selectedObj.deg -= 0;
+							}
+
+							if (this.selectedObj.deg === 0.5) {
+								this.selectedObj.x = this.selectedObj.rx;
+								this.selectedObj.ex = this.selectedObj.rx;
+								this.selectedObj.y = this.selectedObj.ry - this.selectedObj.hl;
+								this.selectedObj.ey = this.selectedObj.ry + this.selectedObj.hl;
+							} else {
+								this.selectedObj.x = this.selectedObj.rx - this.selectedObj.hl * Math.cos(this.selectedObj.deg * Math.PI);
+								this.selectedObj.y = this.selectedObj.ry - this.selectedObj.hl * Math.sin(this.selectedObj.deg * Math.PI);
+								this.selectedObj.ex = this.selectedObj.rx + this.selectedObj.hl * Math.cos(this.selectedObj.deg * Math.PI);
+								this.selectedObj.ey = this.selectedObj.ry + this.selectedObj.hl * Math.sin(this.selectedObj.deg * Math.PI);
+							}
 						}
+
 						this.clearMap();
 						this.drawMap();
 					}
@@ -413,10 +447,30 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			case 'KeyD':
 				{
 					if (this.selectedObj) {
-						this.selectedObj.deg -= 0.0375;
-						if ( this.selectedObj.deg < 0) {
-							this.selectedObj.deg += 1;
+						if (this.selectedObj instanceof Cell) {
+							this.selectedObj.deg -= 0.0125;
+							if ( this.selectedObj.deg < 0) {
+								this.selectedObj.deg += 1;
+							}
+						} else if (this.selectedObj instanceof Road) {
+							this.selectedObj.deg -= 0.0125;
+							if (this.selectedObj.deg < 0) {
+								this.selectedObj.deg += 1;
+							}
+
+							if (this.selectedObj.deg === 0.5) {
+								this.selectedObj.x = this.selectedObj.rx;
+								this.selectedObj.ex = this.selectedObj.rx;
+								this.selectedObj.y = this.selectedObj.ry - this.selectedObj.hl;
+								this.selectedObj.ey = this.selectedObj.ry + this.selectedObj.hl;
+							} else {
+								this.selectedObj.x = this.selectedObj.rx - this.selectedObj.hl * Math.cos(this.selectedObj.deg * Math.PI);
+								this.selectedObj.y = this.selectedObj.ry - this.selectedObj.hl * Math.sin(this.selectedObj.deg * Math.PI);
+								this.selectedObj.ex = this.selectedObj.rx + this.selectedObj.hl * Math.cos(this.selectedObj.deg * Math.PI);
+								this.selectedObj.ey = this.selectedObj.ry + this.selectedObj.hl * Math.sin(this.selectedObj.deg * Math.PI);
+							}
 						}
+
 						this.clearMap();
 						this.drawMap();
 					}
