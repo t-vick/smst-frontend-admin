@@ -111,34 +111,12 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		Object.assign(obj, currObj);
 		if (currObj instanceof Road) {
 			let x: number,y: number, w: number, h: number;
-			// if (obj.y === obj.ey) {
-			// 	x = obj.x;
-			// 	y = obj.y - obj.w / 2;
-			// 	w = Math.abs(obj.ex - obj.x);
-			// 	h = obj.w;
-			// 	let rx = (obj.x + obj.ex) / 2;
-			// 	let ry = (obj.y + obj.ey) / 2 ;
-			// 	obj = new Cell({x, y, w, h, rx, ry, deg:0});
-			// } else if (obj.x === obj.ex) {
-			// 	x = obj.x - obj.w / 2;
-			// 	y = obj.y;
-			// 	w = obj.w;
-			// 	h = Math.abs(obj.ey - obj.y);
-			// 	let rx = (obj.x + obj.ex) / 2;
-			// 	let ry = (obj.y + obj.ey) / 2 ;
-			// 	obj = new Cell({x, y, w, h, rx, ry, deg:0});
-			// } else {
 				x = obj.rx - obj.hl;
 				y = obj.ry - obj.w / 2;
 				w = obj.hl * 2;
 				h = obj.w;
 				let {rx, ry, deg} = obj;
 				obj = new Cell({x, y, w, h, rx, ry, deg: deg});
-			// }
-
-
-
-			// obj = new Cell({x, y, w, h, rx, ry, deg:0});
 		}
 		//先求出旋转后被选择对象各个点的坐标
 		//对角线的一半
@@ -235,60 +213,6 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		return c; 
 
 	} 
-
-
-	private ifInPolygon(points:any, x: number, y: number) {
-		//假设射线线是向x轴正方向发射的
-		let crossNum = 0;
-		for (let i = 0; i < points.length - 1; i++) {
-			//斜率为0
-			if (points[i].y === points[i + 1].y) {
-				if ((y === points[i].y) && 
-					(x >= this.min(points[i].x, points[i+1].x)) &&
-					(x <= this.max(points[i].x, points[i+1].x))) {
-					return true;
-				}
-			}
-
-			//斜率为1
-			if (points[i].x === points[i + 1].x) {
-				if ((x <= points[i].x ) &&
-					(y >= this.min(points[i].y, points[i+1].y)) &&
-					(y <= this.max(points[i].y, points[i+1].y))) {
-					crossNum++;
-				}
-			}
-
-			//其它斜率
-			let crossX: number = (y - points[i].y) * (points[i + 1].x - points[i].x) / (points[i + 1].y - points[i].y) + points[i].x;
-			//交叉点，就是鼠标当前点
-			if ((crossX >= x) && (crossX > this.min(points[i].x, points[i + 1].x)) &&
-				(crossX < this.max(points[i].x, points[i + 1].x))) {
-				crossNum++;//这里crossX等于points[i],或points[i+1]时，不处理，处理也是crossNum+=2,相交于顶点，算两个
-			}
-		}
-		
-		if (crossNum % 2 === 1) {
-			return true;
-		}
-		return false;
-	}
-
-	private max(a: number, b: number): number {
-		if (a > b) {
-			return a;
-		} else {
-			return b;
-		}
-	}
-
-	private min(a: number, b: number): number {
-		if (a < b) {
-			return a;
-		} else {
-			return b;
-		}
-	}
 
 	/**
 	 * 鼠标移动事件处理
@@ -572,7 +496,6 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 	    }
 	    this.ctx.stroke();//放在这里才能保证画出的线条的透明度一致
 	    this.ctx.closePath();
-	    // this.ctx.draw();
 	}
 
 	/**
