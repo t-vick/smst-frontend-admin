@@ -105,7 +105,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		}
 	}
 
-	private isCursorInObj(currObj): boolean {
+	private isCursorInObj(currObj: any): boolean {
 		//如果是道路，先转换成矩形区域
 		let obj: any = {};
 		Object.assign(obj, currObj);
@@ -114,7 +114,7 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 			if (obj.y === obj.ey) {
 				x = obj.x;
 				y = obj.y - obj.w / 2;
-				w = Math.abs(obj.ey - obj.y);
+				w = Math.abs(obj.ex - obj.x);
 				h = obj.w;
 			} else if (obj.x === obj.ex) {
 				x = obj.x - obj.w / 2;
@@ -200,37 +200,30 @@ export class GarageMapDirective implements AfterViewInit, OnChanges, OnDestroy {
 		}
 		let y4: number = (obj.y + obj.h) - ( obj.h / 2 + halfDiagonal * Math.abs(Math.sin( fi - obj.deg * Math.PI )) * addDirectionY4);
 
-		let xArr: number[] = [x1, x2, x3, x4].sort();
-		let yArr: number[] = [y1, y2, y3, y4].sort();
-
-		let points = [
-			{
-				x: x1,
-				y: y1,
-			},
-			{
-				x: x2,
-				y: y2,
-			},
-			{
-				x: x3,
-				y: y3,
-			},
-			{
-				x: x4,
-				y: y4,
-			},
-			{
-				x: x1,
-				y: y1,
-			}
+		let points: Array<Point> = [
+			new Point(x1, y1),
+			new Point(x2, y2),
+			new Point(x3, y3),
+			new Point(x4, y4),
 		];
-console.log(x1, y1);
-console.log(x2, y2);
-console.log(x3, y3);
-console.log(x4, y4);
-		return this.ifInPolygon(points, this.cursor.x, this.cursor.y);
+		return this.isInsidePolygon(this.cursor, points);
 	}
+
+
+	private isInsidePolygon(pt: Point, poly: Array<Point>) { 
+		let c: boolean = false;
+		for (let i = -1, l = poly.length, j = l - 1; ++i < l; j = i) 
+
+			((poly[i].y <= pt.y && pt.y < poly[j].y) || (poly[j].y <= pt.y && pt.y < poly[i].y)) 
+
+			&& (pt.x < (poly[j].x - poly[i].x) * (pt.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x) 
+
+			&& (c = !c); 
+
+		return c; 
+
+	} 
+
 
 	private ifInPolygon(points:any, x: number, y: number) {
 		//假设射线线是向x轴正方向发射的
@@ -412,7 +405,6 @@ console.log(x4, y4);
 						if (this.selectedObj.deg >= 1) {
 							this.selectedObj.deg -= 1;
 						}
-						this.isCursorInObj(this.selectedObj);
 						this.clearMap();
 						this.drawMap();
 					}
@@ -515,7 +507,7 @@ console.log(x4, y4);
 	/**
 	 * 画道路
 	 */
-	private drawRoads (roadList) {
+	private drawRoads (roadList: Array<Road>) {
 	    this.ctx.strokeStyle = 'blue';
 	    this.ctx.beginPath();//只写了这个，才能重绘道路，不然会有重影
 	    for (let road of roadList) {
