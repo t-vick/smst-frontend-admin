@@ -10,34 +10,34 @@
 		</p>
 	  <table class="example-full-width" cellspacing="0"><tr>
 	    <td><md-input-container class="example-full-width">
-	      <input mdInput placeholder="X坐标" type="number">
+	      <input mdInput placeholder="X坐标" type="number" [(ngModel)]="objData.x" [ngModelOptions]="{standalone: true}">
 	    </md-input-container></td>
 	    <td><md-input-container class="example-full-width">
-	      <input mdInput placeholder="Y坐标" type="number">
+	      <input mdInput placeholder="Y坐标" type="number" [(ngModel)]="objData.y" [ngModelOptions]="{standalone: true}">
+	    </md-input-container></td>
+	  </tr></table>
+	  <table class="example-full-width" cellspacing="0" *ngIf="selectedValue==='road'"><tr>
+	    <td><md-input-container class="example-full-width">
+	      <input mdInput placeholder="终止X坐标" type="number" [(ngModel)]="objData.ex" [ngModelOptions]="{standalone: true}">
+	    </md-input-container></td>
+	    <td><md-input-container class="example-full-width">
+	      <input mdInput placeholder="终止Y坐标" type="number" [(ngModel)]="objData.ey" [ngModelOptions]="{standalone: true}">
 	    </md-input-container></td>
 	  </tr></table>
 	  <table class="example-full-width" cellspacing="0"><tr>
 	    <td><md-input-container class="example-full-width">
-	      <input mdInput placeholder="终止X坐标" type="number">
+	      <input mdInput placeholder="宽度" type="number" [(ngModel)]="objData.w" [ngModelOptions]="{standalone: true}">
 	    </md-input-container></td>
 	    <td><md-input-container class="example-full-width">
-	      <input mdInput placeholder="终止Y坐标" type="number">
-	    </md-input-container></td>
-	  </tr></table>
-	  <table class="example-full-width" cellspacing="0"><tr>
-	    <td><md-input-container class="example-full-width">
-	      <input mdInput placeholder="宽度" type="number">
-	    </md-input-container></td>
-	    <td><md-input-container class="example-full-width">
-	      <input mdInput placeholder="高度" type="number">
+	      <input mdInput placeholder="高度" type="number" [(ngModel)]="objData.h" [ngModelOptions]="{standalone: true}">
 	    </md-input-container></td>
 	  </tr></table>
 	  <table class="example-full-width" cellspacing="0"><tr>
-	    <td><md-input-container class="example-full-width">
-	      <input mdInput placeholder="线宽" type="number">
+	    <td *ngIf="selectedValue==='road'"><md-input-container class="example-full-width">
+	      <input mdInput placeholder="线宽" type="number" [(ngModel)]="objData.lw" [ngModelOptions]="{standalone: true}">
 	    </md-input-container></td>
 	    <td><md-input-container class="example-full-width">
-	      <input mdInput placeholder="旋转" type="number">
+	      <input mdInput placeholder="旋转" type="number" [(ngModel)]="objData.deg" [ngModelOptions]="{standalone: true}">
 	    </md-input-container></td>
 	  </tr></table>
 	</form>
