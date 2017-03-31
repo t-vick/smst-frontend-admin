@@ -3,6 +3,8 @@ import { MdDialog } from '@angular/material';
 import { GarageObjAddComponent } from '../garage-obj-add/garage-obj-add.component';
 import { Cell } from '../model/cell.model';
 import { Road } from '../model/road.model';
+
+import { GarageMapService } from './garage-map.service';
 @Component({
 	moduleId: module.id,
 	selector: 'smst-garage-map',
@@ -13,11 +15,22 @@ export class GarageMapComponent implements OnInit, DoCheck, AfterViewInit {
   private option: any;
 
   private boxSize: number;
-  constructor(private el: ElementRef, private dialog: MdDialog) {
+  constructor(
+    private garageMapService: GarageMapService, 
+    private el: ElementRef, 
+    private dialog: MdDialog) {
   	
   }
 
   ngOnInit() {
+    // this.garageMapService.getRoads()
+    // .subscribe(
+    //     (data) => {
+    //         console.log(data[0] instanceof Road);
+    //         let list = new Road(data[0]);
+    //         console.log(list instanceof Road);
+    //     }
+    //   );
     this.option = {
       cellList: [
         new Cell({x: 150, y: 150, w: 75, h: 75, rx: 187.5, ry: 187.5, deg: 0}),

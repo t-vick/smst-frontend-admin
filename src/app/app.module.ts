@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 
 import { CoreModule } from './core/core.module';
 import { GarageModule } from './garage/garage.module';
+import { AppConfigService } from './app-config.service';
 
 @NgModule({
   imports: [
@@ -17,5 +18,6 @@ import { GarageModule } from './garage/garage.module';
     AppComponent,
   ],
   bootstrap: [AppComponent],
+  providers: [ AppConfigService ]
 })
 export class AppModule { }

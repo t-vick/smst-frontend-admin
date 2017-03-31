@@ -13,6 +13,8 @@ import { GarageObjAddComponent } from './garage-obj-add/garage-obj-add.component
 import { GarageMapDirective } from './garage-map.directive';
 
 import { GarageRoutingModule } from './garage-routing.module';
+
+import { GarageMapService } from './garage-map/garage-map.service';
 @NgModule({
 	declarations: [
 		GarageListComponent,
@@ -35,6 +37,7 @@ import { GarageRoutingModule } from './garage-routing.module';
 	entryComponents: [ 	GarageAddComponent,
 						GarageObjAddComponent,
 	],
+	providers: [GarageMapService]
 })
 export class GarageModule {
 
